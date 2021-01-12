@@ -39,8 +39,7 @@ void LteBinder::unregisterNode(MacNodeId id)
     }
 }
 
-MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type,
-    MacNodeId masterId)
+MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type, MacNodeId masterId)
 {
     Enter_Method_Silent("registerNode");
 

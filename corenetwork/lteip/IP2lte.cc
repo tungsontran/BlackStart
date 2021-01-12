@@ -47,8 +47,7 @@ void IP2lte::initialize(int stage)
         {
             // TODO not so elegant
             cModule *enodeb = getParentModule()->getParentModule();
-            MacNodeId cellId = getBinder()->registerNode(enodeb, nodeType_);
-            nodeId_ = cellId;
+            nodeId_ = binder_->registerNode(enodeb, nodeType_);
             registerInterface();
         }
     }
@@ -71,7 +70,7 @@ void IP2lte::initialize(int stage)
                 defaultRoute->setNetmask(IPv4Address(inet::IPv4Address::UNSPECIFIED_ADDRESS));
 
                 IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-                InterfaceEntry * interfaceEntry = ift->getInterfaceByName("wlan");
+                InterfaceEntry * interfaceEntry = ift->getInterfaceByName("wlan1");
                 defaultRoute->setInterface(interfaceEntry);
 
                 irt->addRoute(defaultRoute);
@@ -337,7 +336,10 @@ void IP2lte::registerInterface()
     if (!ift)
         return;
     interfaceEntry = new InterfaceEntry(this);
-    interfaceEntry->setName("wlan");
+    if(nodeType_ == ENODEB)
+        interfaceEntry->setName("wlan0");
+    else if(nodeType_ == UE)
+        interfaceEntry->setName("wlan1");
     // TODO configure MTE size from NED
     interfaceEntry->setMtu(1500);
     // enable broadcast/multicast
@@ -358,7 +360,10 @@ void IP2lte::registerMulticastGroups()
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
         return;
-    interfaceEntry = ift->getInterfaceByName("wlan");
+    if (nodeType_ == ENODEB)
+        interfaceEntry = ift->getInterfaceByName("wlan0");
+    else if (nodeType_ == UE)
+        interfaceEntry = ift->getInterfaceByName("wlan1");
     unsigned int numOfAddresses = interfaceEntry->ipv4Data()->getNumOfJoinedMulticastGroups();
     for (unsigned int i=0; i<numOfAddresses; ++i)
     {
