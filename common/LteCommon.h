@@ -497,6 +497,18 @@ enum LteNodeType
     UNKNOWN_NODE_TYPE /// unknown
 };
 
+/**
+ * Lte Node Types
+ */
+enum LteNodeSubType
+{
+    NONE,
+    E2NODEB,
+    VUE
+};
+
+LteNodeSubType getNodeSubType(const char * subType);
+
 struct LteNodeTable
 {
     LteNodeType node;
@@ -510,6 +522,20 @@ const LteNodeTable nodetypes[] = {
     ELEM(UE),
     ELEM(UNKNOWN_NODE_TYPE)
 };
+
+enum e2NodeBMode
+{
+    NORMAL, OUTAGE
+};
+
+e2NodeBMode getE2NodeBMode(const char * mode);
+
+enum e2NodeBDirection
+{
+    UPLINK, DOWNLINK
+};
+
+e2NodeBDirection getE2NodeBDirection(const char * direction);
 
 /**
  * Subframe type

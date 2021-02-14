@@ -14,6 +14,38 @@
 #include "stack/mac/layer/LteMacEnb.h"
 #include "common/LteControlInfo.h"
 
+e2NodeBMode getE2NodeBMode(const char * mode)
+{
+    EV << "getE2NodeBMode - getting E2NodeB mode as " << mode << endl;
+    if(strcmp(mode,"OUTAGE") == 0)
+        return OUTAGE;
+    if(strcmp(mode,"NORMAL") != 0)
+        throw cRuntimeError("GtpUserSimplified::getE2NodeBMode - unknown E2NodeB mode: [%s]. Aborting...",mode);
+    return NORMAL;
+}
+
+e2NodeBDirection getE2NodeBDirection(const char * direction)
+{
+    EV << "getE2NodeBDirection - getting E2NodeB direction as " << direction << endl;
+    if(strcmp(direction,"UPLINK") == 0)
+        return UPLINK;
+    if(strcmp(direction,"DOWNLINK") != 0)
+        throw cRuntimeError("GtpUserSimplified::getE2NodeBDirection - unknown E2NodeB direction: [%s]. Aborting...",direction);
+    return DOWNLINK;
+}
+
+LteNodeSubType getNodeSubType(const char * subtype)
+{
+    EV << "getNodeSubType - getting node subtype as " << subtype << endl;
+    if(strcmp(subtype,"VUE") == 0)
+        return VUE;
+    if(strcmp(subtype,"E2NODEB") == 0)
+        return E2NODEB;
+    if(strcmp(subtype,"NONE") != 0)
+        throw cRuntimeError("GtpUserSimplified::getNodeSubType - unknown node sub type direction: [%s]. Aborting...",subtype);
+    return NONE;
+}
+
 const std::string lteTrafficClassToA(LteTrafficClass type)
 {
     switch (type)

@@ -70,7 +70,7 @@ void IP2lte::initialize(int stage)
                 defaultRoute->setNetmask(IPv4Address(inet::IPv4Address::UNSPECIFIED_ADDRESS));
 
                 IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-                InterfaceEntry * interfaceEntry = ift->getInterfaceByName("wlan1");
+                InterfaceEntry * interfaceEntry = ift->getInterfaceByName("wlan");
                 defaultRoute->setInterface(interfaceEntry);
 
                 irt->addRoute(defaultRoute);
@@ -109,15 +109,15 @@ void IP2lte::handleMessage(cMessage *msg)
         // message from transport: send to stack
         if (msg->getArrivalGate()->isName("upperLayerIn"))
         {
-            IPv4Datagram *ipDatagram = check_and_cast<IPv4Datagram *>(msg);
+            IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
             EV << "LteIp: message from transport: send to stack" << endl;
-            fromIpUe(ipDatagram);
+            fromIpUe(datagram);
         }
         else if(msg->getArrivalGate()->isName("stackLte$i"))
         {
             // message from stack: send to transport
-            EV << "LteIp: message from stack: send to transport" << endl;
             IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
+            EV << "LteIp: message from stack: send to transport" << endl;
             toIpUe(datagram);
         }
         else
@@ -155,9 +155,6 @@ void IP2lte::fromIpUe(IPv4Datagram * datagram)
 
 void IP2lte::toStackUe(IPv4Datagram * datagram)
 {
-    // obtain the encapsulated transport packet
-    cPacket * transportPacket = datagram->getEncapsulatedPacket();
-
     // 5-Tuple infos
     unsigned short srcPort = 0;
     unsigned short dstPort = 0;
@@ -175,6 +172,37 @@ void IP2lte::toStackUe(IPv4Datagram * datagram)
     }
 
     int headerSize = datagram->getHeaderLength();
+
+    LteNodeSubType subType = getNodeSubType(getParentModule()->getParentModule()->par("nodeSubType"));
+    //    const char* parentsName = getParentModule()->getParentModule()->getFullName();
+
+    cPacket * transportPacket;
+
+    // If the module is UE
+    if (subType == NONE)
+    {
+        // obtain the encapsulated transport packet
+        transportPacket = datagram->getEncapsulatedPacket();
+    }
+    // If the module is vUE
+    else if (subType == VUE)
+    {
+        // check content of datagram is another datagram or a transport packet
+        switch (transportProtocol)
+            {
+                case IP_PROT_TCP:
+                    transportPacket = dynamic_cast<inet::tcp::TCPSegment*>(datagram->getEncapsulatedPacket());
+                    break;
+                case IP_PROT_UDP:
+                    transportPacket = dynamic_cast<inet::UDPPacket*>(datagram->getEncapsulatedPacket());
+                    break;
+            }
+        if (transportPacket == NULL)
+            // is another datagram
+            transportPacket = datagram->getEncapsulatedPacket()->getEncapsulatedPacket();
+        else
+            transportPacket = datagram->getEncapsulatedPacket();
+    }
 
     // inspect packet depending on the transport protocol type
     switch (transportProtocol)
@@ -260,9 +288,6 @@ void IP2lte::toIpEnb(cMessage * msg)
 
 void IP2lte::toStackEnb(IPv4Datagram* datagram)
 {
-    // obtain the encapsulated transport packet
-    cPacket * transportPacket = datagram->getEncapsulatedPacket();
-
     // 5-Tuple infos
     unsigned short srcPort = 0;
     unsigned short dstPort = 0;
@@ -280,6 +305,39 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
     }
 
     int headerSize = 0;
+
+    e2NodeBMode mode = getE2NodeBMode(getParentModule()->getParentModule()->par("mode"));
+    LteNodeSubType subType = getNodeSubType(getParentModule()->getParentModule()->par("nodeSubType"));
+//    const char* parentsName = getParentModule()->getParentModule()->getFullName();
+
+    cPacket * transportPacket;
+
+    // If the module is eNodeB or e2NodeB in normal scenario, process the datagram encapsulating a transport packet
+    if (subType == NONE ||
+        (subType == E2NODEB && mode == NORMAL))
+    {
+        // obtain the encapsulated transport packet
+        transportPacket = datagram->getEncapsulatedPacket();
+    }
+    // If the module is a e2NodeB in outage scenario
+    else if (subType == E2NODEB && mode == OUTAGE)
+    {
+        // check content of datagram is another datagram or a transport packet
+        switch (transportProtocol)
+            {
+                case IP_PROT_TCP:
+                    transportPacket = dynamic_cast<inet::tcp::TCPSegment*>(datagram->getEncapsulatedPacket());
+                    break;
+                case IP_PROT_UDP:
+                    transportPacket = dynamic_cast<inet::UDPPacket*>(datagram->getEncapsulatedPacket());
+                    break;
+            }
+        if (transportPacket == NULL)
+            // is another datagram
+            transportPacket = datagram->getEncapsulatedPacket()->getEncapsulatedPacket();
+        else
+            transportPacket = datagram->getEncapsulatedPacket();
+    }
 
     switch(transportProtocol)
     {
@@ -337,9 +395,9 @@ void IP2lte::registerInterface()
         return;
     interfaceEntry = new InterfaceEntry(this);
     if(nodeType_ == ENODEB)
-        interfaceEntry->setName("wlan0");
+        interfaceEntry->setName("wlan");
     else if(nodeType_ == UE)
-        interfaceEntry->setName("wlan1");
+        interfaceEntry->setName("wlan");
     // TODO configure MTE size from NED
     interfaceEntry->setMtu(1500);
     // enable broadcast/multicast
@@ -361,9 +419,9 @@ void IP2lte::registerMulticastGroups()
     if (!ift)
         return;
     if (nodeType_ == ENODEB)
-        interfaceEntry = ift->getInterfaceByName("wlan0");
+        interfaceEntry = ift->getInterfaceByName("wlan");
     else if (nodeType_ == UE)
-        interfaceEntry = ift->getInterfaceByName("wlan1");
+        interfaceEntry = ift->getInterfaceByName("wlan");
     unsigned int numOfAddresses = interfaceEntry->ipv4Data()->getNumOfJoinedMulticastGroups();
     for (unsigned int i=0; i<numOfAddresses; ++i)
     {

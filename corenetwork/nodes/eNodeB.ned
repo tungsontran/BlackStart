@@ -40,6 +40,8 @@ module eNodeB
 
         //# Node specs
         string nodeType = "ENODEB";        // DO NOT CHANGE
+        string nodeSubType;
+        nodeSubType = default("NONE");
         int macNodeId = default(0); // TODO: this is not a real parameter
         int macCellId = default(0);  // TODO: this is not a real parameter
         double txPower @unit(mw) = default(100mw);

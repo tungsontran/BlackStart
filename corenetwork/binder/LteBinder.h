@@ -271,6 +271,7 @@ class LteBinder : public cSimpleModule
      * Associates the given MAC node ID to the name of the module
      */
     void registerName(MacNodeId nodeId, const char* moduleName);
+
     /**
      * Returns the module name for the given MAC node ID
      */

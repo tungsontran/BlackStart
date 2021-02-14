@@ -63,6 +63,13 @@ void GtpUserSimplified::handleMessage(cMessage *msg)
         GtpUserMsg * gtpMsg = check_and_cast<GtpUserMsg *>(msg);
         handleFromUdp(gtpMsg);
     }
+    else if(strcmp(msg->getArrivalGate()->getFullName(),"appIn")==0)
+    {
+        EV << "GtpUserSimplified::handleMessage - message from virtual UE" << endl;
+
+        IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
+        send(datagram,"pppGate");
+    }
 }
 
 void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
@@ -74,35 +81,131 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
 
     EV << "GtpUserSimplified::handleFromTrafficFlowFilter - Received a tftMessage with flowId[" << flowId << "]" << endl;
 
-    // If we are on the eNB and the flowId represents the ID of this eNB, forward the packet locally
+    e2NodeBMode mode;
+    e2NodeBDirection direction; // @TODO
+    LteNodeSubType subType = getNodeSubType(getParentModule()->par("nodeSubType"));
+
+    if (subType == E2NODEB)
+    {
+        // get e2NodeB current mode & direction
+        mode = getE2NodeBMode(getParentModule()->par("mode"));
+        direction = getE2NodeBDirection(getParentModule()->par("direction")); // @TODO
+        EV << "GtpUserSimplified::handleFromTrafficFlowFilter - eNodeB mode: " << mode
+                                                            << ", direction: " << direction << endl;
+    }
+
+   // If we are on the eNB and the flowId represents the ID of this eNB, forward the packet locally
     if (flowId == 0)
     {
-        // local delivery
+        // intracell delivery
         send(datagram,"pppGate");
     }
     else
     {
-        // create a new GtpUserSimplifiedMessage
-        GtpUserMsg * gtpMsg = new GtpUserMsg();
-        gtpMsg->setName("GtpUserMessage");
-
-        // encapsulate the datagram within the GtpUserSimplifiedMessage
-        gtpMsg->encapsulate(datagram);
-
-        L3Address tunnelPeerAddress;
-        if (flowId == -1) // send to the PGW
+        // intercell delivery
+        if (ownerType_ == PGW ||
+            subType == NONE   ||
+           (subType == E2NODEB && mode == NORMAL))
         {
-            tunnelPeerAddress = pgwAddress_;
+            // create a new GtpUserSimplifiedMessage
+            GtpUserMsg * gtpMsg = new GtpUserMsg();
+            gtpMsg->setName("GtpUserMessage");
+
+            // encapsulate the datagram within the GtpUserSimplifiedMessage
+            gtpMsg->encapsulate(datagram);
+
+            L3Address tunnelPeerAddress;
+            if (flowId == -1) // send to the PGW
+            {
+                tunnelPeerAddress = pgwAddress_;
+            }
+            else
+            {
+                // get the symbolic IP address of the tunnel destination ID
+                // then obtain the address via IPvXAddressResolver
+                const char* symbolicName = binder_->getModuleNameByMacNodeId(flowId);
+                tunnelPeerAddress = L3AddressResolver().resolve(symbolicName);
+            }
+            socket_.sendTo(gtpMsg, tunnelPeerAddress, tunnelPeerPort_);
         }
-        else
+        else if (subType == E2NODEB && mode == OUTAGE && direction == DOWNLINK)
         {
-            // get the symbolic IP address of the tunnel destination ID
-            // then obtain the address via IPvXAddressResolver
-            const char* symbolicName = binder_->getModuleNameByMacNodeId(flowId);
-            tunnelPeerAddress = L3AddressResolver().resolve(symbolicName);
+            // get the node sub type where the datagram originated from
+            IPv4Address addr = datagram->getSourceAddress().toIPv4();
+            MacNodeId nodeId = binder_->getMacNodeId(addr);
+            OmnetId omnetId  = binder_->getOmnetId(nodeId);
+            const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
+            LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+
+            // if datagram comes from an UE
+            if (moduleSubType == NONE)
+            {
+                // test with vUe2_1
+                const char* symbolicName = binder_->getModuleNameByMacNodeId(1026); // @TODO
+                const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
+
+                // double datagram encapsulate, keep old srcAddr, new dstAddr is the vUE of next hop ENB
+                IPv4Datagram *datagram_ = new IPv4Datagram();
+                datagram_->setSourceAddress(datagram->getSourceAddress());
+                datagram_->setDestinationAddress(dstAddr);
+                datagram_->setName("DownlinkAirMessage");
+                datagram_->setTransportProtocol(datagram->getTransportProtocol());
+                datagram_->setIdentification(datagram->getIdentification());
+                datagram_->setTimeToLive(datagram->getTimeToLive());
+                datagram_->encapsulate(datagram);
+
+                send(datagram_,"pppGate");
+                EV << "Outage mode, downlink direction - Sending packet to stack" << endl;
+            }
+            // if datagram comes from a vUE
+            else if (moduleSubType == VUE)
+            {
+                IPv4Datagram *datagram_ = check_and_cast<IPv4Datagram*>(datagram->decapsulate());
+                delete(datagram);
+                send(datagram_,"pppGate");
+            }
         }
-        socket_.sendTo(gtpMsg, tunnelPeerAddress, tunnelPeerPort_);
+        else if (subType == E2NODEB && mode == OUTAGE && direction == UPLINK)
+        {
+            // get the node sub type where the datagram originated from
+            IPv4Address addr = datagram->getSourceAddress().toIPv4();
+            MacNodeId nodeId = binder_->getMacNodeId(addr);
+            OmnetId omnetId  = binder_->getOmnetId(nodeId);
+            const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
+            LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+
+            // if datagram comes from an UE
+            if (moduleSubType == NONE)
+            {
+                // test with vUe1_1
+                const char* symbolicName = binder_->getModuleNameByMacNodeId(2); // @TODO
+                const char* symbolicName2 = binder_->getModuleNameByMacNodeId(1025); // @TODO
+                const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
+                const L3Address srcAddr = L3AddressResolver().resolve(symbolicName2);
+
+                // double datagram encapsulate, new srcAddr is the vUE of this ENB, new dstAddr is the next hop ENB
+                IPv4Datagram *datagram_ = new IPv4Datagram();
+                datagram_->setSourceAddress(srcAddr);
+                datagram_->setDestinationAddress(dstAddr);
+                datagram_->setName("UplinkAirMessage");
+                datagram_->setTransportProtocol(datagram->getTransportProtocol());
+                datagram_->setIdentification(datagram->getIdentification());
+                datagram_->setTimeToLive(datagram->getTimeToLive());
+                datagram_->encapsulate(datagram);
+
+                send(datagram_,"appOut");
+                EV << "Outage mode, uplink direction - Sending packet to local app" << endl;
+            }
+            // if datagram comes from a vUE
+            else if (moduleSubType == VUE)
+            {
+                IPv4Datagram *datagram_ = check_and_cast<IPv4Datagram*>(datagram->decapsulate());
+                delete(datagram);
+                send(datagram_,"pppGate");
+            }
+        }
     }
+
 }
 
 void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)

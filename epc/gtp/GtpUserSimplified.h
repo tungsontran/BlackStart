@@ -62,6 +62,7 @@ class GtpUserSimplified : public cSimpleModule
 
     // receive a GTP-U packet from UDP, reads the TEID and decides whether performing label switching or removal
     void handleFromUdp(GtpUserMsg * gtpMsg);
+
 };
 
 #endif

@@ -21,6 +21,7 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "stack/phy/layer/LtePhyBase.h"
 #include "stack/mac/packet/LteMacSduRequest.h"
+#include <regex>
 
 Define_Module(LteMacUe);
 
@@ -123,8 +124,7 @@ void LteMacUe::initialize(int stage)
         // find interface entry and use its address
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         // TODO: how do we find the LTE interface?
-        InterfaceEntry * interfaceEntry = interfaceTable->getInterfaceByName("wlan1");
-
+        InterfaceEntry * interfaceEntry = interfaceTable->getInterfaceByName("wlan");
         IPv4InterfaceData* ipv4if = interfaceEntry->ipv4Data();
         if(ipv4if == NULL)
         {

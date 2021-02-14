@@ -38,6 +38,7 @@ module Ue
 
         //# Node specs
         string nodeType = "UE";  // DO NOT CHANGE
+        string nodeSubType = "NONE";
         int masterId;
         int macNodeId = default(0); // TODO: this is not a real parameter
         int macCellId = default(0); // TODO: this is not a real parameter

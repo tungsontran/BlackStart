@@ -185,9 +185,9 @@ bool LteMacBase::bufferizePacket(cPacket* pkt)
 
         lcgMap_.insert(LcgPair(tClass, CidBufferPair(cid, macBuffers_[cid])));
 
-        EV << "LteMacBuffers : Using new buffer on node: " <<
-        MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
-        queue->getQueueSize() - queue->getByteLength() << "\n";
+        EV << "LteMacBuffers : Using new buffer on node: " << MacCidToNodeId(cid)
+           << " for Lcid: " << MacCidToLcid(cid)
+           << ", Space left in the Queue: " << queue->getQueueSize() - queue->getByteLength() << "\n";
     }
     else
     {
@@ -217,9 +217,9 @@ bool LteMacBase::bufferizePacket(cPacket* pkt)
         }
         vqueue->pushBack(vpkt);
 
-        EV << "LteMacBuffers : Using old buffer on node: " <<
-        MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
-        queue->getQueueSize() - queue->getByteLength() << "\n";
+        EV << "LteMacBuffers : Using old buffer on node: " << MacCidToNodeId(cid)
+           << " for Lcid: " << MacCidToLcid(cid)
+           << ", Space left in the Queue: " << queue->getQueueSize() - queue->getByteLength() << "\n";
     }
         /// After bufferization buffers must be synchronized
     assert(mbuf_[cid]->getQueueLength() == macBuffers_[cid]->getQueueLength());

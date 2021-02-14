@@ -46,11 +46,14 @@ simple GtpUserSimplified
         @display("i=block/tunnel");
 
     gates:
-        output udpOut;
         input udpIn;
+        output udpOut;
 
         input trafficFlowFilterGate;
         output pppGate;
+        
+        input appIn;
+        output appOut;
 }
 
 //
