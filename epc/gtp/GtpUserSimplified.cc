@@ -35,6 +35,24 @@ void GtpUserSimplified::initialize(int stage)
     pgwAddress_ = L3AddressResolver().resolve("pgw");
 
     ownerType_ = selectOwnerType(getAncestorPar("nodeType"));
+
+    if (ownerType_ != PGW)
+        subType_ = getNodeSubType(getAncestorPar("nodeSubType"));
+
+    if (subType_ == E2NODEB)
+    {
+        // get mode
+        mode_ = getE2NodeBMode(getParentModule()->par("mode").stringValue());
+
+        // get direction vector
+        const char* directions = getParentModule()->par("direction").stringValue();
+        cStringTokenizer tokenizer(directions);
+        while (tokenizer.hasMoreTokens())
+        {
+            e2NodeBDirection direction = getE2NodeBDirection(tokenizer.nextToken());
+            directions_.push_back(direction);
+        }
+    }
 }
 
 EpcNodeType GtpUserSimplified::selectOwnerType(const char * type)
@@ -81,19 +99,6 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
 
     EV << "GtpUserSimplified::handleFromTrafficFlowFilter - Received a tftMessage with flowId[" << flowId << "]" << endl;
 
-    e2NodeBMode mode;
-    e2NodeBDirection direction; // @TODO
-    LteNodeSubType subType = getNodeSubType(getParentModule()->par("nodeSubType"));
-
-    if (subType == E2NODEB)
-    {
-        // get e2NodeB current mode & direction
-        mode = getE2NodeBMode(getParentModule()->par("mode"));
-        direction = getE2NodeBDirection(getParentModule()->par("direction")); // @TODO
-        EV << "GtpUserSimplified::handleFromTrafficFlowFilter - eNodeB mode: " << mode
-                                                            << ", direction: " << direction << endl;
-    }
-
    // If we are on the eNB and the flowId represents the ID of this eNB, forward the packet locally
     if (flowId == 0)
     {
@@ -104,8 +109,8 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
     {
         // intercell delivery
         if (ownerType_ == PGW ||
-            subType == NONE   ||
-           (subType == E2NODEB && mode == NORMAL))
+            subType_ == NONE  ||
+           (subType_ == E2NODEB && mode_ == NORMAL))
         {
             // create a new GtpUserSimplifiedMessage
             GtpUserMsg * gtpMsg = new GtpUserMsg();
@@ -128,84 +133,79 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
             }
             socket_.sendTo(gtpMsg, tunnelPeerAddress, tunnelPeerPort_);
         }
-        else if (subType == E2NODEB && mode == OUTAGE && direction == DOWNLINK)
+        else if (subType_ == E2NODEB && mode_ == OUTAGE)
         {
             // get the node sub type where the datagram originated from
-            IPv4Address addr = datagram->getSourceAddress().toIPv4();
-            MacNodeId nodeId = binder_->getMacNodeId(addr);
-            OmnetId omnetId  = binder_->getOmnetId(nodeId);
-            const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
-            LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+            LteNodeSubType moduleSubType = getSrcNodeSubType(datagram);
+            // @TODO: make direction determined by datagram dest id
 
-            // if datagram comes from an UE
-            if (moduleSubType == NONE)
+            if (directions_.at(0) == DOWNLINK)
             {
-                // test with vUe2_1
-                const char* symbolicName = binder_->getModuleNameByMacNodeId(1026); // @TODO
-                const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
+                // if datagram comes from an UE
+                if (moduleSubType == NONE)
+                {
+                    // test with vUe2_1
+                    const char* symbolicName = binder_->getModuleNameByMacNodeId(1026); // @TODO
+                    const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
 
-                // double datagram encapsulate, keep old srcAddr, new dstAddr is the vUE of next hop ENB
-                IPv4Datagram *datagram_ = new IPv4Datagram();
-                datagram_->setSourceAddress(datagram->getSourceAddress());
-                datagram_->setDestinationAddress(dstAddr);
-                datagram_->setName("DownlinkAirMessage");
-                datagram_->setTransportProtocol(datagram->getTransportProtocol());
-                datagram_->setIdentification(datagram->getIdentification());
-                datagram_->setTimeToLive(datagram->getTimeToLive());
-                datagram_->encapsulate(datagram);
+                    // double datagram encapsulate, keep old srcAddr, new dstAddr is the vUE of next hop ENB
+                    IPv4Datagram *datagram_ = new IPv4Datagram();
+                    datagram_->setSourceAddress(datagram->getSourceAddress());
+                    datagram_->setDestinationAddress(dstAddr);
+                    datagram_->setName("DownlinkAirMessage");
+                    datagram_->setTransportProtocol(datagram->getTransportProtocol());
+                    datagram_->setIdentification(datagram->getIdentification());
+                    datagram_->setTimeToLive(datagram->getTimeToLive());
+                    datagram_->encapsulate(datagram);
 
-                send(datagram_,"pppGate");
-                EV << "Outage mode, downlink direction - Sending packet to stack" << endl;
+                    send(datagram_,"pppGate");
+                    EV << "Outage mode, downlink direction - Sending packet to stack" << endl;
+                }
+                // if datagram comes from a vUE
+                else if (moduleSubType == VUE)
+                {
+                    IPv4Datagram *datagram_ = check_and_cast<IPv4Datagram*>(datagram->decapsulate());
+                    delete(datagram);
+                    send(datagram_,"pppGate");
+                }
             }
-            // if datagram comes from a vUE
-            else if (moduleSubType == VUE)
+            else if (directions_.at(0) == UPLINK)
             {
-                IPv4Datagram *datagram_ = check_and_cast<IPv4Datagram*>(datagram->decapsulate());
-                delete(datagram);
-                send(datagram_,"pppGate");
-            }
-        }
-        else if (subType == E2NODEB && mode == OUTAGE && direction == UPLINK)
-        {
-            // get the node sub type where the datagram originated from
-            IPv4Address addr = datagram->getSourceAddress().toIPv4();
-            MacNodeId nodeId = binder_->getMacNodeId(addr);
-            OmnetId omnetId  = binder_->getOmnetId(nodeId);
-            const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
-            LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+                // get the node sub type where the datagram originated from
+                LteNodeSubType moduleSubType = getSrcNodeSubType(datagram);
 
-            // if datagram comes from an UE
-            if (moduleSubType == NONE)
-            {
-                // test with vUe1_1
-                const char* symbolicName = binder_->getModuleNameByMacNodeId(2); // @TODO
-                const char* symbolicName2 = binder_->getModuleNameByMacNodeId(1025); // @TODO
-                const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
-                const L3Address srcAddr = L3AddressResolver().resolve(symbolicName2);
+                // if datagram comes from an UE
+                if (moduleSubType == NONE)
+                {
+                    // test with vUe1_1
+                    const char* symbolicName = binder_->getModuleNameByMacNodeId(2); // @TODO
+                    const char* symbolicName2 = binder_->getModuleNameByMacNodeId(1025); // @TODO
+                    const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
+                    const L3Address srcAddr = L3AddressResolver().resolve(symbolicName2);
 
-                // double datagram encapsulate, new srcAddr is the vUE of this ENB, new dstAddr is the next hop ENB
-                IPv4Datagram *datagram_ = new IPv4Datagram();
-                datagram_->setSourceAddress(srcAddr);
-                datagram_->setDestinationAddress(dstAddr);
-                datagram_->setName("UplinkAirMessage");
-                datagram_->setTransportProtocol(datagram->getTransportProtocol());
-                datagram_->setIdentification(datagram->getIdentification());
-                datagram_->setTimeToLive(datagram->getTimeToLive());
-                datagram_->encapsulate(datagram);
+                    // double datagram encapsulate, new srcAddr is the vUE of this ENB, new dstAddr is the next hop ENB
+                    IPv4Datagram *datagram_ = new IPv4Datagram();
+                    datagram_->setSourceAddress(srcAddr);
+                    datagram_->setDestinationAddress(dstAddr);
+                    datagram_->setName("UplinkAirMessage");
+                    datagram_->setTransportProtocol(datagram->getTransportProtocol());
+                    datagram_->setIdentification(datagram->getIdentification());
+                    datagram_->setTimeToLive(datagram->getTimeToLive());
+                    datagram_->encapsulate(datagram);
 
-                send(datagram_,"appOut");
-                EV << "Outage mode, uplink direction - Sending packet to local app" << endl;
-            }
-            // if datagram comes from a vUE
-            else if (moduleSubType == VUE)
-            {
-                IPv4Datagram *datagram_ = check_and_cast<IPv4Datagram*>(datagram->decapsulate());
-                delete(datagram);
-                send(datagram_,"pppGate");
+                    send(datagram_,"appOut");
+                    EV << "Outage mode, uplink direction - Sending packet to local app" << endl;
+                }
+                // if datagram comes from a vUE
+                else if (moduleSubType == VUE)
+                {
+                    IPv4Datagram *datagram_ = check_and_cast<IPv4Datagram*>(datagram->decapsulate());
+                    delete(datagram);
+                    send(datagram_,"pppGate");
+                }
             }
         }
     }
-
 }
 
 void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
@@ -269,4 +269,14 @@ void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
 
         EV << "GtpUserSimplified::handleFromUdp - Destination is not served by this eNodeB. Sending GTP packet to the PGW"<< endl;
     }
+}
+
+LteNodeSubType GtpUserSimplified::getSrcNodeSubType(IPv4Datagram* datagram)
+{
+    IPv4Address addr = datagram->getSourceAddress().toIPv4();
+    MacNodeId nodeId = binder_->getMacNodeId(addr);
+    OmnetId omnetId  = binder_->getOmnetId(nodeId);
+    const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
+    LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+    return moduleSubType;
 }
