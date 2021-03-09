@@ -170,16 +170,16 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
         tempBandLim = emptyBandLim_;
         bandLim = &tempBandLim;
     }
-    EV << "LteSchedulerEnb::grant(" << cid << "," << bytes << "," << terminate << "," << active << "," << eligible << "," << bands_msg << "," << dasToA(antenna) << ")" << endl;
+    EV << "LteSchedulerEnb::scheduleGrant(" << cid << "," << bytes << "," << terminate << "," << active << "," << eligible << "," << bands_msg << "," << dasToA(antenna) << ")" << endl;
 
     unsigned int totalAllocatedBytes = 0;  // total allocated data (in bytes)
     unsigned int totalAllocatedBlocks = 0; // total allocated data (in blocks)
 
     // === Perform normal operation for grant === //
 
-    EV << "LteSchedulerEnb::grant --------------------::[ START GRANT ]::--------------------" << endl;
-    EV << "LteSchedulerEnb::grant Cell: " << mac_->getMacCellId() << endl;
-    EV << "LteSchedulerEnb::grant CID: " << cid << "(UE: " << nodeId << ", Flow: " << flowId << ") current Antenna [" << dasToA(antenna) << "]" << endl;
+    EV << "LteSchedulerEnb::scheduleGrant --------------------::[ START GRANT ]::--------------------" << endl;
+    EV << "LteSchedulerEnb::scheduleGrant Cell: " << mac_->getMacCellId() << endl;
+    EV << "LteSchedulerEnb::scheduleGrant CID: " << cid << "(UE: " << nodeId << ", Flow: " << flowId << ") current Antenna [" << dasToA(antenna) << "]" << endl;
 
     //! Multiuser MIMO support
     if (mac_->muMimo() && (txParams.readTxMode() == MULTI_USER))
@@ -191,13 +191,13 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
             // this user has a valid pairing
             //1) register pairing  - if pairing is already registered false is returned
             if (allocator_->configureMuMimoPeering(nodeId, peer))
-                EV << "LteSchedulerEnb::grant MU-MIMO pairing established: main user [" << nodeId << "], paired user [" << peer << "]" << endl;
+                EV << "LteSchedulerEnb::scheduleGrant MU-MIMO pairing established: main user [" << nodeId << "], paired user [" << peer << "]" << endl;
             else
-                EV << "LteSchedulerEnb::grant MU-MIMO pairing already exists between users [" << nodeId << "] and [" << peer << "]" << endl;
+                EV << "LteSchedulerEnb::scheduleGrant MU-MIMO pairing already exists between users [" << nodeId << "] and [" << peer << "]" << endl;
         }
         else
         {
-            EV << "LteSchedulerEnb::grant no MU-MIMO pairing available for user [" << nodeId << "]" << endl;
+            EV << "LteSchedulerEnb::scheduleGrant no MU-MIMO pairing available for user [" << nodeId << "]" << endl;
         }
     }
 
@@ -218,7 +218,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
         (txParams.readTxMode() != MULTI_USER || plane != MU_MIMO_PLANE)))
     {
         terminate = true; // ODFM space ended, issuing terminate flag
-        EV << "LteSchedulerEnb::grant Space ended, no schedulation." << endl;
+        EV << "LteSchedulerEnb::scheduleGrant Space ended, no schedulation." << endl;
         return 0;
     }
 
@@ -236,10 +236,10 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
     if (debug)
     {
         if (limitBl)
-            EV << "LteSchedulerEnb::grant blocks: " << bytes << endl;
+            EV << "LteSchedulerEnb::scheduleGrant blocks: " << bytes << endl;
         else
-            EV << "LteSchedulerEnb::grant Bytes: " << bytes << endl;
-        EV << "LteSchedulerEnb::grant Bands: {";
+            EV << "LteSchedulerEnb::scheduleGrant Bytes: " << bytes << endl;
+        EV << "LteSchedulerEnb::scheduleGrant Bands: {";
         unsigned int size = (*bandLim).size();
         if (size > 0)
         {
@@ -251,8 +251,8 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
     }
     // ===== END DEBUG OUTPUT ===== //
 
-    EV << "LteSchedulerEnb::grant TxMode: " << txModeToA(txParams.readTxMode()) << endl;
-    EV << "LteSchedulerEnb::grant Available codewords: " << numCodewords << endl;
+    EV << "LteSchedulerEnb::scheduleGrant TxMode: " << txModeToA(txParams.readTxMode()) << endl;
+    EV << "LteSchedulerEnb::scheduleGrant Available codewords: " << numCodewords << endl;
 
     // Retrieve the first free codeword checking the eligibility - check eligibility could modify current cw index.
     Codeword cw = 0; // current codeword, modified by reference by the checkeligibility function
@@ -260,10 +260,10 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
     {
         eligible = false;
 
-        EV << "LteSchedulerEnb::grant @@@@@ CODEWORD " << cw << " @@@@@" << endl;
-        EV << "LteSchedulerEnb::grant Total allocation: " << totalAllocatedBytes << "bytes" << endl;
-        EV << "LteSchedulerEnb::grant NOT ELIGIBLE!!!" << endl;
-        EV << "LteSchedulerEnb::grant --------------------::[  END GRANT  ]::--------------------" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant @@@@@ CODEWORD " << cw << " @@@@@" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant Total allocation: " << totalAllocatedBytes << "bytes" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant NOT ELIGIBLE!!!" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant --------------------::[  END GRANT  ]::--------------------" << endl;
         return totalAllocatedBytes; // return the total number of served bytes
     }
 
@@ -276,7 +276,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
     {
         active = false;
         EV << "LteSchedulerEnb::scheduleGrant - scheduled connection is no more active . Exiting grant " << endl;
-        EV << "LteSchedulerEnb::grant --------------------::[  END GRANT  ]::--------------------" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant --------------------::[  END GRANT  ]::--------------------" << endl;
         return totalAllocatedBytes;
     }
 
@@ -284,7 +284,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
     unsigned int toServe = 0;
     for (; cw < numCodewords; ++cw)
     {
-        EV << "LteSchedulerEnb::grant @@@@@ CODEWORD " << cw << " @@@@@" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant @@@@@ CODEWORD " << cw << " @@@@@" << endl;
 
         queueLength += MAC_HEADER + RLC_HEADER_UM;  // TODO RLC may be either UM or AM
         toServe = queueLength;
@@ -301,12 +301,12 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
             // save the band and the relative limit
             Band b = (*bandLim).at(i).band_;
             int limit = (*bandLim).at(i).limit_.at(cw);
-            EV << "LteSchedulerEnb::grant --- BAND " << b << " LIMIT " << limit << "---" << endl;
+            EV << "LteSchedulerEnb::scheduleGrant --- BAND " << b << " LIMIT " << limit << "---" << endl;
 
             // if the limit flag is set to skip, jump off
             if (limit == -2)
             {
-                EV << "LteSchedulerEnb::grant skipping logical band according to limit value" << endl;
+                EV << "LteSchedulerEnb::scheduleGrant skipping logical band according to limit value" << endl;
                 continue;
             }
 
@@ -327,14 +327,14 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
             }
             else // if limit is expressed in blocks, limit value must be passed to availableBytes function
             {
-                bandAvailableBytes = availableBytes(nodeId, antenna, b, cw, dir, (limitBl) ? limit : -1); // available space (in bytes)
                 bandAvailableBlocks = allocator_->availableBlocks(nodeId, antenna, b);
+                bandAvailableBytes = availableBytes(nodeId, antenna, b, cw, dir, (limitBl) ? limit : -1); // available space (in bytes)
             }
 
             // if no allocation can be performed, notify to skip the band on next processing (if any)
             if (bandAvailableBytes == 0)
             {
-                EV << "LteSchedulerEnb::grant Band " << b << "will be skipped since it has no space left." << endl;
+                EV << "LteSchedulerEnb::scheduleGrant Band " << b << "will be skipped since it has no space left." << endl;
                 (*bandLim).at(i).limit_.at(cw) = -2;
                 continue;
             }
@@ -346,7 +346,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
                 if (limit >= 0 && limit < (int) bandAvailableBytes)
                 {
                     bandAvailableBytes = limit;
-                    EV << "LteSchedulerEnb::grant Band space limited to " << bandAvailableBytes << " bytes according to limit cap" << endl;
+                    EV << "LteSchedulerEnb::scheduleGrant Band space limited to " << bandAvailableBytes << " bytes according to limit cap" << endl;
                 }
             }
             else
@@ -355,11 +355,11 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
                 if(limit >= 0 && limit < (int) bandAvailableBlocks)
                 {
                     bandAvailableBlocks=limit;
-                    EV << "LteSchedulerEnb::grant Band space limited to " << bandAvailableBlocks << " blocks according to limit cap" << endl;
+                    EV << "LteSchedulerEnb::scheduleGrant Band space limited to " << bandAvailableBlocks << " blocks according to limit cap" << endl;
                 }
             }
 
-            EV << "LteSchedulerEnb::grant Available Bytes: " << bandAvailableBytes << " available blocks " << bandAvailableBlocks << endl;
+            EV << "LteSchedulerEnb::scheduleGrant Available Bytes: " << bandAvailableBytes << " available blocks " << bandAvailableBlocks << endl;
 
             unsigned int uBytes = (bandAvailableBytes > queueLength) ? queueLength : bandAvailableBytes;
             unsigned int uBlocks = mac_->getAmc()->computeReqRbs(nodeId, b, cw, uBytes, dir);
@@ -411,7 +411,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
                 // serve the entire vPkt, remove pkt info
                 conn->popFront();
                 consumedBytes -= vPktSize;
-                EV << "LteSchedulerEnb::grant - the first SDU/BSR is served entirely, remove it from the virtual buffer, remaining bytes to serve[" << consumedBytes << "]" << endl;
+                EV << "LteSchedulerEnb::scheduleGrant - the first SDU/BSR is served entirely, remove it from the virtual buffer, remaining bytes to serve[" << consumedBytes << "]" << endl;
             }
             else
             {
@@ -420,11 +420,11 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
                 newPktInfo.first = newPktInfo.first - consumedBytes;
                 conn->pushFront(newPktInfo);
                 consumedBytes = 0;
-                EV << "LteSchedulerEnb::grant - the first SDU/BSR is partially served, update its size [" << newPktInfo.first << "]" << endl;
+                EV << "LteSchedulerEnb::scheduleGrant - the first SDU/BSR is partially served, update its size [" << newPktInfo.first << "]" << endl;
             }
         }
 
-        EV << "LteSchedulerEnb::grant Codeword allocation: " << cwAllocatedBytes << "bytes" << endl;
+        EV << "LteSchedulerEnb::scheduleGrant Codeword allocation: " << cwAllocatedBytes << "bytes" << endl;
         if (cwAllocatedBytes > 0)
         {
             // mark codeword as used
@@ -444,7 +444,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
             // otherwise it contains number of granted blocks
             scheduleList_[scListId] += ((dir == DL) ? vQueueItemCounter : cwAllocatedBlocks);
 
-            EV << "LteSchedulerEnb::grant CODEWORD IS NOW BUSY: GO TO NEXT CODEWORD." << endl;
+            EV << "LteSchedulerEnb::scheduleGrant CODEWORD IS NOW BUSY: GO TO NEXT CODEWORD." << endl;
             if (allocatedCws_.at(nodeId) == MAX_CODEWORDS)
             {
                 eligible = false;
@@ -453,7 +453,7 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
         }
         else
         {
-            EV << "LteSchedulerEnb::grant CODEWORD IS FREE: NO ALLOCATION IS POSSIBLE IN NEXT CODEWORD." << endl;
+            EV << "LteSchedulerEnb::scheduleGrant CODEWORD IS FREE: NO ALLOCATION IS POSSIBLE IN NEXT CODEWORD." << endl;
             eligible = false;
             stop = true;
         }
@@ -461,8 +461,8 @@ unsigned int LteSchedulerEnb::scheduleGrant(MacCid cid, unsigned int bytes, bool
             break;
     } // Closes loop on Codewords
 
-    EV << "LteSchedulerEnb::grant Total allocation: " << totalAllocatedBytes << " bytes, " << totalAllocatedBlocks << " blocks" << endl;
-    EV << "LteSchedulerEnb::grant --------------------::[  END GRANT  ]::--------------------" << endl;
+    EV << "LteSchedulerEnb::scheduleGrant Total allocation: " << totalAllocatedBytes << " bytes, " << totalAllocatedBlocks << " blocks" << endl;
+    EV << "LteSchedulerEnb::scheduleGrant --------------------::[  END GRANT  ]::--------------------" << endl;
 
     return totalAllocatedBytes;
 }

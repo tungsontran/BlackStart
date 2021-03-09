@@ -202,7 +202,7 @@ class LteAllocationModule
     // returns the amount of free blocks for the given band in the given plane
     unsigned int availableBlocks(const MacNodeId nodeId, const Plane plane, const Band band);
 
-    // returns the amount of free blocks for the given band and for the fiven antenna
+    // returns the amount of free blocks for the given band and for the given antenna
     unsigned int availableBlocks(const MacNodeId nodeId, const Remote antenna, const Band band);
     // ***************************************************************
 
