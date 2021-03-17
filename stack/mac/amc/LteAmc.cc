@@ -516,6 +516,8 @@ MacNodeId LteAmc::computeMuMimoPairing(const MacNodeId nodeId, Direction dir)
     {
         return muMimoD2DMatrix_.getMuMimoPair(nodeId);
     }
+    throw cRuntimeError("LteAmc::computeMuMimoPairing(): Unrecognized direction");
+    return 0;
 }
 
 /********************************
@@ -803,8 +805,7 @@ unsigned int LteAmc::computeBytesOnNRbs_MB(MacNodeId id, Band b, unsigned int bl
     unsigned int bytes = bits/8;
 
     // DEBUG
-//    EV << NOW << " LteAmc::computeBytesOnNRbs_MB Resource Blocks: " << blocks << "\n";
-//    EV << NOW << " LteAmc::computeBytesOnNRbs_MB Available space: " << bits << "\n";
+
     EV << NOW << " LteAmc::computeBytesOnNRbs_MB Available space: " << bytes << "\n";
 
     return bytes;
@@ -1010,7 +1011,7 @@ LteAmc::blockGain(Cqi cqi, unsigned int layers, unsigned int blocks, Direction d
         return 0;
     const unsigned int* tbsVect = readTbsVect(cqi, layers, dir);
 
-    if (tbsVect == NULL)
+    if (tbsVect == nullptr)
         return 0;
     return (tbsVect[blocks - 1] / 8);
 }
@@ -1040,7 +1041,7 @@ LteAmc::readTbsVect(Cqi cqi, unsigned int layers, Direction dir)
     unsigned int itbs = getItbsPerCqi(cqi, dir);
     LteMod mod = cqiTable[cqi].mod_;
 
-    const unsigned int* tbsVect = NULL;
+    const unsigned int* tbsVect = nullptr;
     switch (mod)
     {
         case _QPSK:

@@ -33,7 +33,7 @@ LteHarqFeedback *LteHarqProcessRxD2D::createFeedback(Codeword cw)
     if (pduInfo->getDirection() == D2D_MULTI)
     {
         // if the PDU belongs to a multicast connection, then do not create feedback
-        fb = NULL;
+        fb = nullptr;
     }
     else
     {
@@ -57,7 +57,7 @@ LteHarqFeedback *LteHarqProcessRxD2D::createFeedback(Codeword cw)
             // if the PDU belongs to a multicast/broadcast connection, then reset the codeword, since there will be no retransmission
             EV << NOW << " LteHarqProcessRxD2D::createFeedback - pdu for cw " << cw << " belonged to a multicast/broadcast connection. Resetting cw " << endl;
             delete pdu_.at(cw);
-            pdu_.at(cw) = NULL;
+            pdu_.at(cw) = nullptr;
             resetCodeword(cw);
         }
         else
@@ -95,7 +95,7 @@ LteHarqFeedbackMirror* LteHarqProcessRxD2D::createFeedbackMirror(Codeword cw)
     if (pduInfo->getDirection() == D2D_MULTI)
     {
         // if the PDU belongs to a multicast connection, then do not create feedback
-        fb = NULL;
+        fb = nullptr;
     }
     else
     {

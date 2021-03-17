@@ -498,7 +498,7 @@ enum LteNodeType
 };
 
 /**
- * Lte Node Types
+ * Lte Node Sub Types
  */
 enum LteNodeSubType
 {

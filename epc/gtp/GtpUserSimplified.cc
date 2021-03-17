@@ -108,9 +108,9 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
     else
     {
         // intercell delivery
-        if (ownerType_ == PGW ||
-            subType_ == NONE  ||
-           (subType_ == E2NODEB && mode_ == NORMAL))
+        if (ownerType_ == PGW ||                            // if this is a PGW
+            subType_ == NONE  ||                            // if this is an ENB
+           (subType_ == E2NODEB && mode_ == NORMAL))        // if this is an E2NB on normal mode
         {
             // create a new GtpUserSimplifiedMessage
             GtpUserMsg * gtpMsg = new GtpUserMsg();
@@ -171,9 +171,6 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
             }
             else if (directions_.at(0) == UPLINK)
             {
-                // get the node sub type where the datagram originated from
-                LteNodeSubType moduleSubType = getSrcNodeSubType(datagram);
-
                 // if datagram comes from an UE
                 if (moduleSubType == NONE)
                 {

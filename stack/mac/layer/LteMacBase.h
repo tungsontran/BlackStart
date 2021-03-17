@@ -132,6 +132,13 @@ class LteMacBase : public cSimpleModule
     // record the last TTI that HARQ processes for a given UE have been aborted (useful for D2D switching)
     std::map<MacNodeId, simtime_t> resetHarq_;
 
+    // statistics in visualization
+    bool statDisplay_;
+    inet::uint64 nrFromUpper_;
+    inet::uint64 nrFromLower_;
+    inet::uint64 nrToUpper_;
+    inet::uint64 nrToLower_;
+
   public:
 
     /**
@@ -245,27 +252,32 @@ class LteMacBase : public cSimpleModule
         return false;
     }
 
+    void unregisterHarqBufferRx(MacNodeId nodeId);
+
+    // visualization
+    void refreshDisplay() const override;
+
   protected:
 
-    virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
+    virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
 
     /**
      * Grabs NED parameters, initializes gates
      * and the TTI self message
      */
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
 
     /**
      * Analyze gate of incoming packet
      * and call proper handler
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
 
     /**
      * Statistics recording
      */
-    virtual void finish();
+    virtual void finish() override;
 
     /**
      * Deleting the module
@@ -273,7 +285,7 @@ class LteMacBase : public cSimpleModule
      * Method is overridden in order to cancel the periodic TTI self-message,
      * afterwards the deleteModule method of cSimpleModule is called.
      */
-    virtual void deleteModule();
+    virtual void deleteModule() override;
 
     /**
      * Main loop of the Mac level, calls the scheduler

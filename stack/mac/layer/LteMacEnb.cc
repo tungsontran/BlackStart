@@ -32,17 +32,17 @@ Define_Module( LteMacEnb);
 LteMacEnb::LteMacEnb() :
     LteMacBase()
 {
-    cellInfo_ = NULL;
-    amc_ = NULL;
-    enbSchedulerDl_ = NULL;
-    enbSchedulerUl_ = NULL;
+    cellInfo_ = nullptr;
+    amc_ = nullptr;
+    enbSchedulerDl_ = nullptr;
+    enbSchedulerUl_ = nullptr;
     numAntennas_ = 0;
     bsrbuf_.clear();
     currentSubFrameType_ = NORMAL_FRAME_TYPE;
     nodeType_ = ENODEB;
     frameIndex_ = 0;
     lastTtiAllocatedRb_ = 0;
-    scheduleListDl_ = NULL;
+    scheduleListDl_ = nullptr;
 }
 
 LteMacEnb::~LteMacEnb()
@@ -64,7 +64,7 @@ LteMacEnb::~LteMacEnb()
 LteCellInfo* LteMacEnb::getCellInfo()
 {
     // Get local cellInfo
-    if (cellInfo_ != NULL)
+    if (cellInfo_ != nullptr)
         return cellInfo_;
 
     return check_and_cast<LteCellInfo*>(getParentModule()-> // Stack
@@ -237,14 +237,14 @@ void LteMacEnb::initialize(int stage)
         numAntennas_ = getNumAntennas();
 
         /* Create and initialize MAC Downlink scheduler */
-        if (enbSchedulerDl_ == NULL)
+        if (enbSchedulerDl_ == nullptr)
         {
             enbSchedulerDl_ = new LteSchedulerEnbDl();
             enbSchedulerDl_->initialize(DL, this);
         }
 
         /* Create and initialize MAC Uplink scheduler */
-        if (enbSchedulerUl_ == NULL)
+        if (enbSchedulerUl_ == nullptr)
         {
             enbSchedulerUl_ = new LteSchedulerEnbUl();
             enbSchedulerUl_->initialize(UL, this);
@@ -298,7 +298,7 @@ void LteMacEnb::macSduRequest()
     for (it = scheduleListDl_->begin(); it != scheduleListDl_->end(); it++)
     {
         MacCid destCid = it->first.first;
-        Codeword cw = it->first.second;
+        // Codeword cw = it->first.second;
         MacNodeId destId = MacCidToNodeId(destCid);
 
         // for each band, count the number of bytes allocated for this ue (dovrebbe essere per cid)
@@ -597,7 +597,7 @@ void LteMacEnb::macPduMake(MacCid cid)
             }
             pkt = mbuf_[destCid]->popFront();
 
-            ASSERT(pkt != NULL);
+            ASSERT(pkt != nullptr);
 
             drop(pkt);
             macPkt->pushSdu(pkt);
@@ -688,8 +688,11 @@ int LteMacEnb::getNumRbUl()
 
 bool LteMacEnb::bufferizePacket(cPacket* pkt)
 {
-    if (pkt->getByteLength() == 0)
+
+    if (pkt->getBitLength() <= 1) { // no data in this packet
+        delete pkt;
         return false;
+    }
 
     pkt->setTimestamp();        // Add timestamp with current time to packet
 
@@ -760,6 +763,9 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
         LteMacQueue* queue = it->second;
         if (!queue->pushBack(pkt))
         {
+            // unable to buffer packet (packet is not enqueued and will be dropped): update statistics
+            EV << "LteMacBuffers : queue" << cid << " is full - cannot buffer packet " << pkt->getId()<< "\n";
+
             totalOverflowedBytes_ += pkt->getByteLength();
             double sample = (double)totalOverflowedBytes_ / (NOW - getSimulation()->getWarmupPeriod());
             if (lteInfo->getDirection()==DL)
@@ -771,17 +777,12 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
                 emit(macBufferOverflowUl_,sample);
             }
 
-            EV << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
-            delete pkt;
-            return false;
+            EV << "LteMacBuffers : Using old buffer on node: " <<
+            MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
+            queue->getQueueSize() - queue->getByteLength() << "\n";
         }
-
-        EV << "LteMacBuffers : Using old buffer on node: " <<
-        MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
-        queue->getQueueSize() - queue->getByteLength() << "\n";
     }
-
-    return false; // do not need to notify the activation of the connection (already done when received newDataPkt)
+    return true;
 }
 
 void LteMacEnb::handleUpperMessage(cPacket* pkt)
@@ -826,7 +827,7 @@ void LteMacEnb::handleSelfMessage()
     // extract pdus from all harqrxbuffers and pass them to unmaker
     HarqRxBuffers::iterator hit = harqRxBuffers_.begin();
     HarqRxBuffers::iterator het = harqRxBuffers_.end();
-    LteMacPdu *pdu = NULL;
+    LteMacPdu *pdu = nullptr;
     std::list<LteMacPdu*> pduList;
 
     for (; hit != het; hit++)
@@ -867,7 +868,7 @@ void LteMacEnb::handleSelfMessage()
     if (activation)
     {
         // clear previous schedule list
-        if (scheduleListDl_ != NULL)
+        if (scheduleListDl_ != nullptr)
             scheduleListDl_->clear();
 
         // perform Downlink scheduling
@@ -919,8 +920,8 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
             if (!jt->isEmptyFeedback())
             {
                 amc_->pushFeedback(id, DL, (*jt));
-                LteMacUe* macUe = check_and_cast<LteMacUe*>(getMacByMacNodeId(id));
-//                macUe->collectCqiStatistics(id, DL, (*jt));
+                // LteMacUe* macUe = check_and_cast<LteMacUe*>(getMacByMacNodeId(id));
+                //  macUe->collectCqiStatistics(id, DL, (*jt));
             }
             i++;
         }
@@ -985,5 +986,5 @@ unsigned int LteMacEnb::getDlPrevBandStatus(Band b)
 
 ConflictGraph* LteMacEnb::getConflictGraph()
 {
-    return NULL;
+    return nullptr;
 }

@@ -20,7 +20,7 @@ LteHarqBufferRxD2D::LteHarqBufferRxD2D(unsigned int num, LteMacBase *owner, MacN
 {
     macOwner_ = owner;
     nodeId_ = nodeId;
-    macUe_ = check_and_cast<LteMacBase*>(getMacByMacNodeId(nodeId_));
+    initMacUe();
     numHarqProcesses_ = num;
     processes_.resize(numHarqProcesses_);
     totalRcvdBytes_ = 0;
@@ -87,7 +87,7 @@ void LteHarqBufferRxD2D::sendFeedback()
             {
                 // create a copy of the feedback to be sent to the eNB
                 LteHarqFeedbackMirror *mirrorHfb = check_and_cast<LteHarqProcessRxD2D*>(processes_[i])->createFeedbackMirror(cw);
-                if (mirrorHfb == NULL)
+                if (mirrorHfb == nullptr)
                 {
                     EV<<NOW<<"LteHarqBufferRxD2D::sendFeedback - cw "<< cw << " of process " << i
                             << " contains a pdu belonging to a multicast/broadcast connection. Don't send feedback mirror." << endl;
@@ -98,7 +98,7 @@ void LteHarqBufferRxD2D::sendFeedback()
                 }
 
                 LteHarqFeedback *hfb = processes_[i]->createFeedback(cw);
-                if (hfb == NULL)
+                if (hfb == nullptr)
                 {
                     EV<<NOW<<"LteHarqBufferRxD2D::sendFeedback - cw "<< cw << " of process " << i
                             << " contains a pdu belonging to a multicast/broadcast connection. Don't send feedback." << endl;
@@ -142,7 +142,7 @@ std::list<LteMacPdu *> LteHarqBufferRxD2D::extractCorrectPdus()
                 }
                 else
                 {
-                    macUe_->emit(macDelay_, (NOW - temp->getCreationTime()).dbl());
+                    macUe_emit(macDelay_, (NOW - temp->getCreationTime()).dbl());
                 }
 
                 // Calculate Throughput by sending the number of bits for this packet
@@ -166,7 +166,7 @@ std::list<LteMacPdu *> LteHarqBufferRxD2D::extractCorrectPdus()
                     }
                     else  // UL
                     {
-                        macUe_->emit(macThroughput_, tputSample);
+                        macUe_emit(macThroughput_, tputSample);
                     }
                 }
 

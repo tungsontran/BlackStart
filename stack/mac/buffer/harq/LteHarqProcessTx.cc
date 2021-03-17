@@ -265,6 +265,6 @@ LteHarqProcessTx::~LteHarqProcessTx()
 
     units_->clear();
     delete units_;
-    units_ = NULL;
-    macOwner_ = NULL;
+    units_ = nullptr;
+    macOwner_ = nullptr;
 }

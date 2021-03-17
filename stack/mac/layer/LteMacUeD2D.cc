@@ -18,8 +18,7 @@
 
 Define_Module(LteMacUeD2D);
 
-LteMacUeD2D::LteMacUeD2D() :
-    LteMacUe()
+LteMacUeD2D::LteMacUeD2D() :LteMacUe()
 {
     racD2DMulticastRequested_ = false;
     bsrD2DMulticastTriggered_ = false;
@@ -131,7 +130,7 @@ void LteMacUeD2D::macPduMake(MacCid cid)
                 info->setLcid(D2D_SHORT_BSR);
 
             // Add the created BSR to the PDU List
-            if( macPktBsr != NULL )
+            if( macPktBsr != nullptr )
             {
                macPduList_[ std::pair<MacNodeId, Codeword>( getMacCellId(), 0) ] = macPktBsr;
                bsrAlreadyMade = true;
@@ -260,10 +259,12 @@ void LteMacUeD2D::macPduMake(MacCid cid)
             LteHarqBufferTx* hb;
             // FIXME: hb is never deleted
             UserControlInfo* info = check_and_cast<UserControlInfo*>(pit->second->getControlInfo());
-            if (info->getDirection() == UL)
+            if (info->getDirection() == UL){
                 hb = new LteHarqBufferTx((unsigned int) ENB_TX_HARQ_PROCESSES, this, (LteMacBase*) getMacByMacNodeId(destId));
-            else // D2D or D2D_MULTI
+            }
+            else { // D2D or D2D_MULTI
                 hb = new LteHarqBufferTxD2D((unsigned int) ENB_TX_HARQ_PROCESSES, this, (LteMacBase*) getMacByMacNodeId(destId));
+            }
             harqTxBuffers_[destId] = hb;
             txBuf = hb;
         }
@@ -416,10 +417,10 @@ LteMacUeD2D::macHandleGrant(cPacket* pkt)
 
     //Codeword cw = grant->getCodeword();
 
-    if (schedulingGrant_!=NULL)
+    if (schedulingGrant_!=nullptr)
     {
-        delete schedulingGrant_;
-        schedulingGrant_ = NULL;
+        // delete schedulingGrant_;
+        schedulingGrant_ = nullptr;
     }
 
     // store received grant
@@ -491,7 +492,7 @@ void LteMacUeD2D::checkRAC()
     }
 
     if (!trigger && !triggerD2DMulticast)
-        EV << NOW << "Ue " << nodeId_ << ",RAC aborted, no data in queues " << endl;
+        EV << NOW << " LteMacUeD2D::checkRAC , Ue " << nodeId_ << ",RAC aborted, no data in queues " << endl;
 
     if ((racRequested_=trigger) || (racD2DMulticastRequested_=triggerD2DMulticast))
     {
@@ -561,7 +562,7 @@ void LteMacUeD2D::handleSelfMessage()
     // extract pdus from all harqrxbuffers and pass them to unmaker
     HarqRxBuffers::iterator hit = harqRxBuffers_.begin();
     HarqRxBuffers::iterator het = harqRxBuffers_.end();
-    LteMacPdu *pdu = NULL;
+    LteMacPdu *pdu = nullptr;
     std::list<LteMacPdu*> pduList;
 
     for (; hit != het; ++hit)
@@ -575,12 +576,12 @@ void LteMacUeD2D::handleSelfMessage()
         }
     }
 
-    EV << NOW << "LteMacUeD2D::handleSelfMessage " << nodeId_ << " - HARQ process " << (unsigned int)currentHarq_ << endl;
+    EV << NOW << " LteMacUeD2D::handleSelfMessage " << nodeId_ << " - HARQ process " << (unsigned int)currentHarq_ << endl;
 
     // no grant available - if user has backlogged data, it will trigger scheduling request
     // no harq counter is updated since no transmission is sent.
 
-    if (schedulingGrant_==NULL)
+    if (schedulingGrant_==nullptr)
     {
         EV << NOW << " LteMacUeD2D::handleSelfMessage " << nodeId_ << " NO configured grant" << endl;
 
@@ -594,8 +595,8 @@ void LteMacUeD2D::handleSelfMessage()
         if(--expirationCounter_ < 0)
         {
             // Periodic grant is expired
-            delete schedulingGrant_;
-            schedulingGrant_ = NULL;
+            // delete schedulingGrant_;
+            schedulingGrant_ = nullptr;
             // if necessary, a RAC request will be sent to obtain a grant
             checkRAC();
         }
@@ -612,14 +613,13 @@ void LteMacUeD2D::handleSelfMessage()
     }
 
     requestedSdus_ = 0;
-    if (schedulingGrant_!=NULL) // if a grant is configured
+    if (schedulingGrant_!=nullptr) // if a grant is configured
     {
         if(!firstTx)
         {
             EV << "\t currentHarq_ counter initialized " << endl;
             firstTx=true;
             // the eNb will receive the first pdu in 2 TTI, thus initializing acid to 0
-//            currentHarq_ = harqRxBuffers_.begin()->second->getProcesses() - 2;
             currentHarq_ = UE_TX_HARQ_PROCESSES - 2;
         }
         EV << "\t " << schedulingGrant_ << endl;
@@ -802,7 +802,7 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
 
         // find the correct connection involved in the mode switch
         MacCid cid;
-        FlowControlInfo* lteInfo = NULL;
+        FlowControlInfo* lteInfo = nullptr;
         std::map<MacCid, FlowControlInfo>::iterator it = connDesc_.begin();
         for (; it != connDesc_.end(); ++it)
         {
@@ -919,7 +919,7 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
 
         // find the correct connection involved in the mode switch
         MacCid cid;
-        FlowControlInfo* lteInfo = NULL;
+        FlowControlInfo* lteInfo = nullptr;
         std::map<MacCid, FlowControlInfo>::iterator it = connDescIn_.begin();
         for (; it != connDescIn_.end(); ++it)
         {

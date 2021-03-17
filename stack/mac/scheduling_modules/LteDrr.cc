@@ -15,7 +15,7 @@ void LteDrr::prepareSchedule()
     activeTempList_ = activeList_;
     drrTempMap_ = drrMap_;
 
-    if (binder_ == NULL)
+    if (binder_ == nullptr)
         binder_ = getBinder();
 
     bool terminateFlag = false, activeFlag = true, eligibleFlag = true;
@@ -123,11 +123,12 @@ LteDrr::updateSchedulingInfo()
     else if (direction_ == UL)
     {
         conn = eNbScheduler_->mac_->getBsrVirtualBuffers();
+    } else {
+        conn = nullptr;
+        throw cRuntimeError("LteDrr::updateSchedulingInfo invalid direction");
     }
-    else
-        throw cRuntimeError("Invalid direction in LteDrr::updateSchedulingInfo()");
 
-    //    // Iterators to cycle through the maps of connection descriptors.
+    // Iterators to cycle through the maps of connection descriptors.
 
     LteMacBufferMap::iterator it = conn->begin(), et = conn->end();
 

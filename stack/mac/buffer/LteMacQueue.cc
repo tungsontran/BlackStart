@@ -55,12 +55,12 @@ bool LteMacQueue::pushFront(cPacket *pkt)
 
 cPacket* LteMacQueue::popFront()
 {
-    return getQueueLength() > 0 ? cPacketQueue::pop() : NULL;
+    return getQueueLength() > 0 ? cPacketQueue::pop() : nullptr;
 }
 
 cPacket* LteMacQueue::popBack()
 {
-    return getQueueLength() > 0 ? cPacketQueue::remove(cPacketQueue::back()) : NULL;
+    return getQueueLength() > 0 ? cPacketQueue::remove(cPacketQueue::back()) : nullptr;
 }
 
 simtime_t LteMacQueue::getHolTimestamp() const
@@ -84,7 +84,15 @@ bool LteMacQueue::isEnqueueablePacket(cPacket* pkt){
         // unlimited queue size -- nothing to check for
         return true;
     }
-    if(pdu != NULL){
+    /* Check:
+     *
+     * For AM: We need to check if all fragments will fit in the queue
+     * For UM: The new UM implementation introduced in commit 9ab9b71c5358a70278e2fbd51bf33a9d1d81cb86
+     *         by G. Nardini only sends SDUs upon MAC SDU request. All SDUs are
+     *         accepted as long as the MAC queue size is not exceeded.
+     * For TM: No fragments are to be checked, anyways.
+     */
+    if(pdu != nullptr){ // for AM we need to check if all fragments will fit
         if(pdu->getTotalFragments() > 1) {
             bool allFragsWillFit = ((pdu->getTotalFragments()-pdu->getSnoFragment())*pdu->getByteLength() + getByteLength() < queueSize_);
             bool enqueable = (pdu->getSnoMainPacket() != lastUnenqueueableMainSno) && allFragsWillFit;
