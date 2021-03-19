@@ -59,7 +59,7 @@ class ChannelAccess : public cSimpleModule, public cListener
     bool positionUpdateArrived;
 
   public:
-    ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
+    ChannelAccess() : cc(nullptr), myRadioRef(nullptr), hostModule(nullptr) {}
     virtual ~ChannelAccess();
 
     /**
@@ -81,8 +81,8 @@ class ChannelAccess : public cSimpleModule, public cListener
     cModule *getHostModule() const { return hostModule; }
 
     /** Register with ChannelControl and subscribe to hostPos*/
-    virtual void initialize(int stage);
-    virtual int numInitStages() const { return inet::INITSTAGE_PHYSICAL_LAYER + 1; }
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return inet::INITSTAGE_PHYSICAL_LAYER + 1; }
 };
 
 #endif

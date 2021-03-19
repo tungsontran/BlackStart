@@ -45,9 +45,9 @@ void LteX2Manager::initialize(int stage)
 //            std::regex filter("wlan[0-9]",std::regex_constants::ECMAScript | std::regex_constants::icase);
 //            if ((std::regex_search(ifName,filter))||
 //                (strstr(ifName,"x2ppp") != NULL))
-            if (strstr(ifName,"x2ppp") != NULL)
+            if (strstr(ifName,"x2ppp") != nullptr)
             {
-                IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
+                const IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
                 getBinder()->setX2NodeId(addr, nodeId_);
             }
         }

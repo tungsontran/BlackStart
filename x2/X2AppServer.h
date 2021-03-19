@@ -24,8 +24,8 @@ class X2AppServer : public SCTPServer
         cGate* x2ManagerIn_;
 
     protected:
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
+        virtual void initialize(int stage) override;
+        virtual void handleMessage(cMessage *msg) override;
         void handleTimer(cMessage *msg);
         void generateAndSend(cPacket* pkt);
 };

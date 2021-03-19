@@ -45,11 +45,11 @@ class TrafficFlowFilterSimplified : public cSimpleModule
 
     EpcNodeType selectOwnerType(const char * type);
   protected:
-    virtual int numInitStages() const { return INITSTAGE_LAST+1; }
-    virtual void initialize(int stage);
+    virtual int numInitStages() const override{ return INITSTAGE_LAST+1; }
+    virtual void initialize(int stage) override;
 
     // TrafficFlowFilter module may receive messages only from the input interface of its compound module
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     // functions for managing filter tables
     TrafficFlowTemplateId findTrafficFlow(L3Address srcAddress, L3Address destAddress);

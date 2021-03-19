@@ -59,7 +59,7 @@ class InternetQueue : public cSimpleModule
     /**
      * Initialize class fields.
      */
-    virtual void initialize();
+    virtual void initialize() override;
 
     /**
      * Handle messages.
@@ -73,7 +73,7 @@ class InternetQueue : public cSimpleModule
      *
      * @param msg message received
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Start the transmission of a new packet.

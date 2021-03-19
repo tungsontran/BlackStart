@@ -9,9 +9,6 @@
 
 package lte.epc;
 
-//
-// TODO auto-generated module
-//
 simple TrafficFlowFilter
 {
     parameters:

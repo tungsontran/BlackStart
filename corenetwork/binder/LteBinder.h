@@ -100,11 +100,11 @@ class LteBinder : public cSimpleModule
     // store the id of the UEs that are performing handover
     std::set<MacNodeId> ueHandoverTriggered_;
   protected:
-    virtual void initialize(int stages);
+    virtual void initialize(int stages) override;
 
-    virtual int numInitStages() const { return INITSTAGE_LAST; }
+    virtual int numInitStages() const override { return INITSTAGE_LAST; }
 
-    virtual void handleMessage(cMessage *msg)
+    virtual void handleMessage(cMessage *msg) override
     {
     }
 

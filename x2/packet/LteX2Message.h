@@ -49,8 +49,7 @@ class LteX2Message : public LteX2Message_Base
     /**
      * Constructor
      */
-    LteX2Message(const char* name = NULL, int kind = 0) :
-        LteX2Message_Base(name, kind)
+    LteX2Message(const char* name = nullptr, int kind = 0) : LteX2Message_Base(name, kind)
     {
         type_ = X2_UNKNOWN_MSG;
         ieList_.clear();
@@ -62,8 +61,7 @@ class LteX2Message : public LteX2Message_Base
      * FIXME Copy constructors do not preserve ownership
      * Here I should iterate on the list and set all ownerships
      */
-    LteX2Message(const LteX2Message& other) :
-        LteX2Message_Base()
+    LteX2Message(const LteX2Message& other) : LteX2Message_Base()
     {
         operator=(other);
     }
@@ -86,15 +84,15 @@ class LteX2Message : public LteX2Message_Base
 
     virtual ~LteX2Message()
     {
-        while(!ieList_.empty())
-        {
+        while (!ieList_.empty()){
+            delete ieList_.front();
             ieList_.pop_front();
         }
     }
 
     // getter/setter methods for the type field
     void setType(LteX2MessageType type) { type_ = type; }
-    LteX2MessageType getType() { return type_; }
+    LteX2MessageType getType() const { return type_; }
 
     /**
      * pushIe() stores a IE inside the
