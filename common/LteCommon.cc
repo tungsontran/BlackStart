@@ -46,6 +46,14 @@ LteNodeSubType getNodeSubType(const char * subtype)
     return NONE;
 }
 
+LteNodeSubType getNodeSubTypeById(MacNodeId nodeId)
+{
+    OmnetId omnetId  = getBinder()->getOmnetId(nodeId);
+    const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
+    LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+    return moduleSubType;
+}
+
 const std::string lteTrafficClassToA(LteTrafficClass type)
 {
     switch (type)

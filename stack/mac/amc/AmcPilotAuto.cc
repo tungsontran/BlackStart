@@ -154,7 +154,6 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
     // DEBUG
     EV << NOW << " AmcPilot" << getName() << "::computeTxParams NEW values assigned! - CQI =" << chosenCqi << "\n";
     info.print("AmcPilotAuto::computeTxParams");
-
     return amc_->setTxParams(id, dir, info);
 }
 

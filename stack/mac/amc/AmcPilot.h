@@ -92,6 +92,7 @@ class AmcPilot
     virtual bool getUsableBands(MacNodeId id, UsableBands*& uBands) = 0;
 
     void setMode(PilotComputationModes mode ) { mode_ = mode; }
+    PilotComputationModes getMode(){return mode_;}
 };
 
 #endif

@@ -14,6 +14,7 @@
 #include "stack/mac/layer/LteMacBase.h"
 #include "stack/mac/amc/LteAmc.h"
 #include "common/LteCommon.h"
+#include "virtual/virtualRouter.h"
 
 class MacBsr;
 class LteSchedulerEnbDl;
@@ -37,6 +38,8 @@ class LteMacEnb : public LteMacBase
 
     int eNodeBCount;
 
+//    ueCqi* ueCqi_;
+    virtualRouter* virtualRouter_;
     /**
      * Variable used for Downlink energy consumption computation
      */
@@ -96,7 +99,7 @@ class LteMacEnb : public LteMacBase
      * to the Schedule List (stored after scheduling).
      * It sends them to H-ARQ
      */
-    virtual void macPduMake(MacCid cid);
+    virtual void macPduMake(MacCid cid) override;
 
     /**
      * macPduUnmake() extracts SDUs from a received MAC
@@ -331,6 +334,12 @@ class LteMacEnb : public LteMacBase
     }
 
     virtual ConflictGraph* getConflictGraph();
+
+    virtualRouter* getVirtualRouter()
+    {
+        return check_and_cast<virtualRouter*>(getParentModule()->getParentModule()->getSubmodule("virtualRouter"));
+    }
+
 
 };
 

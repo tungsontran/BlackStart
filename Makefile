@@ -137,6 +137,10 @@ OBJS = \
     $O/stack/rlc/um/LteRlcUmD2D.o \
     $O/stack/rlc/um/entity/UmRxEntity.o \
     $O/stack/rlc/um/entity/UmTxEntity.o \
+    $O/virtual/CoeAgent.o \
+    $O/virtual/CoeController.o \
+    $O/virtual/virtualRouter.o \
+    $O/virtual/vUeApp.o \
     $O/world/radio/ChannelAccess.o \
     $O/world/radio/ChannelControl.o \
     $O/world/radio/LteChannelControl.o \

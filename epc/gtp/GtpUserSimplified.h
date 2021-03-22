@@ -57,8 +57,6 @@ class GtpUserSimplified : public cSimpleModule
 
     LteNodeSubType subType_;
 
-    LteNodeSubType getSrcNodeSubType(IPv4Datagram* datagram);
-
   protected:
 
     virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
@@ -70,6 +68,9 @@ class GtpUserSimplified : public cSimpleModule
 
     // receive a GTP-U packet from UDP, reads the TEID and decides whether performing label switching or removal
     void handleFromUdp(GtpUserMsg * gtpMsg);
+
+    LteNodeSubType getSrcNodeSubType(IPv4Datagram* datagram);
+    LteNodeSubType getDstNodeSubType(IPv4Datagram* datagram);
 };
 
 #endif

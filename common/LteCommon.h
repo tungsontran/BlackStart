@@ -45,7 +45,6 @@ class LteControlInfo;
 class ExtCell;
 
 
-
 /**
  * TODO
  */
@@ -508,6 +507,15 @@ enum LteNodeSubType
 };
 
 LteNodeSubType getNodeSubType(const char * subType);
+LteNodeSubType getNodeSubTypeById(MacNodeId nodeId);
+
+/* for E2NB virtual routing */
+// Associate UE ID with corresponding CQI
+typedef std::map<MacNodeId,Cqi> ueCqi;
+// Associate ENB ID with corresponding connected UEs
+typedef std::pair<MacNodeId,ueCqi> virtualNetInfo;
+// Store network information of net info pairs
+typedef std::map<MacNodeId,ueCqi> virtualRoutingTable;
 
 struct LteNodeTable
 {

@@ -226,6 +226,9 @@ void LteMacEnb::initialize(int stage)
 
         cellId_ = nodeId_;
 
+        /* get virtual Router*/
+        virtualRouter_ = getVirtualRouter();
+
         // TODO: read NED parameters, when will be present
         cellInfo_ = getCellInfo();
         /* Get num RB Dl */
@@ -890,7 +893,6 @@ void LteMacEnb::handleSelfMessage()
     cMessage* flushHarqMsg = new cMessage("flushHarqMsg");
     flushHarqMsg->setSchedulingPriority(1);        // after other messages
     scheduleAt(NOW, flushHarqMsg);
-
     EV << "--- END ENB MAIN LOOP ---" << endl;
 }
 
@@ -934,6 +936,9 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
                 amc_->pushFeedback(id, UL, (*jt));
         }
     }
+    ueCqi ueCqi_ = getAmc()->getUeCqi();
+    virtualRouter_->setVirtualNetInfo(ueCqi_);
+    virtualRouter_->printInfo();
     delete fb;
 }
 

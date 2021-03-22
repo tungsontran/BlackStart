@@ -271,8 +271,18 @@ void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
 LteNodeSubType GtpUserSimplified::getSrcNodeSubType(IPv4Datagram* datagram)
 {
     IPv4Address addr = datagram->getSourceAddress().toIPv4();
-    MacNodeId nodeId = binder_->getMacNodeId(addr);
-    OmnetId omnetId  = binder_->getOmnetId(nodeId);
+    MacNodeId nodeId = getBinder()->getMacNodeId(addr);
+    OmnetId omnetId  = getBinder()->getOmnetId(nodeId);
+    const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
+    LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
+    return moduleSubType;
+}
+
+LteNodeSubType GtpUserSimplified::getDstNodeSubType(IPv4Datagram* datagram)
+{
+    IPv4Address addr = datagram->getDestinationAddress().toIPv4();
+    MacNodeId nodeId = getBinder()->getMacNodeId(addr);
+    OmnetId omnetId  = getBinder()->getOmnetId(nodeId);
     const char* moduleSubType_  = getSimulation()->getModule(omnetId)->par("nodeSubType");
     LteNodeSubType moduleSubType = getNodeSubType(moduleSubType_);
     return moduleSubType;

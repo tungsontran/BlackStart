@@ -36,7 +36,7 @@ class AmcPilotAuto : public AmcPilot
     AmcPilotAuto(LteAmc *amc) :
         AmcPilot(amc)
     {
-        mode_ = MIN_CQI;
+        mode_ = MAX_CQI;
         name_ = "Auto";
     }
     /**

@@ -60,6 +60,7 @@ class LteAmc
     int numAntennas_;
     RemoteSet remoteSet_;
     Cqi kCqi_;
+    ueCqi ueCqi_;
     ConnectedUesMap dlConnectedUe_;
     ConnectedUesMap ulConnectedUe_;
     ConnectedUesMap d2dConnectedUe_;
@@ -202,6 +203,9 @@ class LteAmc
     std::vector<Cqi>  readMultiBandCqi(MacNodeId id, const Direction dir);
 
     int getSystemNumBands() { return numBands_; }
+
+    ueCqi getUeCqi(){return ueCqi_;}
+    void setUeCqi(MacNodeId nodeId, Cqi cqi);
 };
 
 #endif
