@@ -21,6 +21,7 @@
 #include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "stack/mac/layer/LteMacBase.h"
+#include "virtual/packet/RoutingTableMsg.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ void IP2lte::initialize(int stage)
     {
         stackGateOut_ = gate("stackLte$o");
         ipGateOut_ = gate("upperLayerOut");
+        routerGateOut_ = gate("toRouter");
 
         setNodeType(par("nodeType").stdstringValue());
 
@@ -88,10 +90,12 @@ void IP2lte::handleMessage(cMessage *msg)
     if( nodeType_ == ENODEB )
     {
         // message from IP Layer: send to stack
-        if (msg->getArrivalGate()->isName("upperLayerIn"))
+        if (msg->getArrivalGate()->isName("upperLayerIn")||msg->getArrivalGate()->isName("fromRouter"))
         {
-            IPv4Datagram *ipDatagram = check_and_cast<IPv4Datagram *>(msg);
-            fromIpEnb(ipDatagram);
+            if (dynamic_cast<IPv4Datagram *>(msg))
+                fromIpEnb((IPv4Datagram *)msg);
+            else if (dynamic_cast<RoutingTableMsg *>(msg))
+                toRouter((RoutingTableMsg *)msg);
         }
         // message from stack: send to peer
         else if(msg->getArrivalGate()->isName("stackLte$i"))
@@ -174,7 +178,6 @@ void IP2lte::toStackUe(IPv4Datagram * datagram)
     int headerSize = datagram->getHeaderLength();
 
     LteNodeSubType subType = getNodeSubType(getParentModule()->getParentModule()->par("nodeSubType"));
-    //    const char* parentsName = getParentModule()->getParentModule()->getFullName();
 
     cPacket * transportPacket;
 
@@ -244,6 +247,12 @@ void IP2lte::toIpUe(IPv4Datagram *datagram)
     send(datagram,ipGateOut_);
 }
 
+void IP2lte::toRouter(RoutingTableMsg *msg)
+{
+    EV << "IP2lte::toRouter - message from stack: send to IP layer" << endl;
+    send(msg,routerGateOut_);
+}
+
 void IP2lte::fromIpEnb(IPv4Datagram * datagram)
 {
     EV << "IP2lte::fromIpEnb - message from IP layer: send to stack" << endl;
@@ -282,8 +291,16 @@ void IP2lte::fromIpEnb(IPv4Datagram * datagram)
 
 void IP2lte::toIpEnb(cMessage * msg)
 {
-    EV << "IP2lte::toIpEnb - message from stack: send to IP layer" << endl;
-    send(msg,ipGateOut_);
+    if (!strcmp(msg->getName(),"LSA_HELLO"))
+    {
+        EV << "IP2lte::toIpEnb - message from stack: send to virtual router" << endl;
+        send(msg,routerGateOut_);
+    }
+    else
+    {
+        EV << "IP2lte::toIpEnb - message from stack: send to IP layer" << endl;
+        send(msg,ipGateOut_);
+    }
 }
 
 void IP2lte::toStackEnb(IPv4Datagram* datagram)
@@ -332,9 +349,11 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
                     transportPacket = dynamic_cast<inet::UDPPacket*>(datagram->getEncapsulatedPacket());
                     break;
             }
-        if (transportPacket == NULL)
+        if (transportPacket == nullptr)
+        {
             // is another datagram
             transportPacket = datagram->getEncapsulatedPacket()->getEncapsulatedPacket();
+        }
         else
             transportPacket = datagram->getEncapsulatedPacket();
     }
@@ -342,19 +361,24 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
     switch(transportProtocol)
     {
         case IP_PROT_TCP:
-        inet::tcp::TCPSegment* tcpseg;
-        tcpseg = check_and_cast<inet::tcp::TCPSegment*>(transportPacket);
-        srcPort = tcpseg->getSrcPort();
-        dstPort = tcpseg->getDestPort();
-        headerSize += tcpseg->getHeaderLength();
-        break;
+            inet::tcp::TCPSegment* tcpseg;
+            tcpseg = check_and_cast<inet::tcp::TCPSegment*>(transportPacket);
+            srcPort = tcpseg->getSrcPort();
+            dstPort = tcpseg->getDestPort();
+            headerSize += tcpseg->getHeaderLength();
+            break;
         case IP_PROT_UDP:
-        inet::UDPPacket* udppacket;
-        udppacket = check_and_cast<inet::UDPPacket*>(transportPacket);
-        srcPort = udppacket->getSourcePort();
-        dstPort = udppacket->getDestinationPort();
-        headerSize += UDP_HEADER_BYTES;
-        break;
+            inet::UDPPacket* udppacket;
+            udppacket = check_and_cast<inet::UDPPacket*>(transportPacket);
+            srcPort = udppacket->getSourcePort();
+            dstPort = udppacket->getDestinationPort();
+            headerSize += UDP_HEADER_BYTES;
+            break;
+        case IP_PROT_NONE:
+            srcPort = 0;
+            dstPort = 0;
+            headerSize += 0;  //@TODO header size?
+            break;
     }
 
     FlowControlInfo *controlInfo = new FlowControlInfo();
@@ -374,7 +398,6 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
 
     send(datagram,stackGateOut_);
 }
-
 
 void IP2lte::printControlInfo(FlowControlInfo* ci)
 {

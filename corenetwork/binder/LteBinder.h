@@ -229,6 +229,9 @@ class LteBinder : public cSimpleModule
         return macNodeIdToIPAddress_[address];
     }
 
+    // get L3Address from given MacNodeId
+    L3Address getL3Address(MacNodeId id);
+
     /**
      * Returns the X2NodeId for the given IP address
      *
@@ -249,6 +252,7 @@ class LteBinder : public cSimpleModule
     {
         macNodeIdToIPAddress_[address] = nodeId;
     }
+
     /**
      * Associates the given IP address with the given X2NodeId.
      *

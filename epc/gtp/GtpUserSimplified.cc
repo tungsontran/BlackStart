@@ -85,8 +85,7 @@ void GtpUserSimplified::handleMessage(cMessage *msg)
     {
         EV << "GtpUserSimplified::handleMessage - message from virtual UE" << endl;
 
-        IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
-        send(datagram,"pppGate");
+        send(msg,"pppGate");
     }
 }
 
@@ -145,8 +144,8 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
                 if (moduleSubType == NONE)
                 {
                     // test with vUe2_1
-                    const char* symbolicName = binder_->getModuleNameByMacNodeId(1026); // @TODO
-                    const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
+//                    const char* symbolicName = binder_->getModuleNameByMacNodeId(1026); // @TODO
+                    const L3Address dstAddr = binder_->getL3Address(1026);
 
                     // double datagram encapsulate, keep old srcAddr, new dstAddr is the vUE of next hop ENB
                     IPv4Datagram *datagram_ = new IPv4Datagram();
@@ -175,11 +174,12 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
                 if (moduleSubType == NONE)
                 {
                     // test with vUe1_1
-                    const char* symbolicName = binder_->getModuleNameByMacNodeId(2); // @TODO
-                    const char* symbolicName2 = binder_->getModuleNameByMacNodeId(1025); // @TODO
-                    const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
-                    const L3Address srcAddr = L3AddressResolver().resolve(symbolicName2);
-
+//                    const char* symbolicName = binder_->getModuleNameByMacNodeId(2); // @TODO
+//                    const char* symbolicName2 = binder_->getModuleNameByMacNodeId(1025); // @TODO
+//                    const L3Address dstAddr = L3AddressResolver().resolve(symbolicName);
+//                    const L3Address srcAddr = L3AddressResolver().resolve(symbolicName2);
+                    const L3Address dstAddr = binder_->getL3Address(2);
+                    const L3Address srcAddr = binder_->getL3Address(1025);
                     // double datagram encapsulate, new srcAddr is the vUE of this ENB, new dstAddr is the next hop ENB
                     IPv4Datagram *datagram_ = new IPv4Datagram();
                     datagram_->setSourceAddress(srcAddr);

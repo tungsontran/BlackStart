@@ -112,7 +112,9 @@ void LtePhyUe::initialize(int stage)
                 Coord cellPos = cellPhy->getCoord();
 
                 // build a control info
-                cInfo->setSourceId(cellId);
+                cInfo->setDirection(UL);
+                cInfo->setSourceId(nodeId_);
+                cInfo->setDestId(cellId);
                 cInfo->setTxPower(cellTxPower);
                 cInfo->setCoord(cellPos);
                 cInfo->setFrameType(FEEDBACKPKT);
@@ -584,7 +586,7 @@ void LtePhyUe::sendFeedback(LteFeedbackDoubleVector fbDl, LteFeedbackDoubleVecto
     LteFeedbackPkt* fbPkt = new LteFeedbackPkt();
     //Set the feedback
     fbPkt->setLteFeedbackDoubleVectorDl(fbDl);
-    fbPkt->setLteFeedbackDoubleVectorDl(fbUl);
+    fbPkt->setLteFeedbackDoubleVectorUl(fbUl);
     fbPkt->setSourceNodeId(nodeId_);
     UserControlInfo* uinfo = new UserControlInfo();
     uinfo->setSourceId(nodeId_);

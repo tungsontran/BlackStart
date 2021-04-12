@@ -22,7 +22,7 @@ import lte.virtual.vUeApp;
 module e2NodeB extends eNodeB
 {
     parameters:
-        int numvUe = default(6);
+      	int numVUE;
         string mode = default("NORMAL");
         string direction = default("DOWNLINK DOWNLINK DOWNLINK DOWNLINK DOWNLINK DOWNLINK");
         nodeSubType = "E2NODEB";
@@ -30,18 +30,22 @@ module e2NodeB extends eNodeB
         inout app[];
     submodules:
         virtualRouter: virtualRouter {
-            @display("p=50,41.538464;i=block/cogwheel_s");
+            @display("p=154.35,406.35;i=block/cogwheel");
         }
-        vUeApp[numvUe]: vUeApp {
+		vUeApp: vUeApp {
+		    numVUE = numVUE;
             @display("p=682.5,268.8");
         }
     connections allowunconnected:
-        for i=0..numvUe-1 {
-            vUeApp[i].intIO$o --> gtpUser.appIn;
-            vUeApp[i].intIO$i <-- gtpUser.appOut;
+	
+		vUeApp.intIO$o --> gtpUser.appIn;
+        vUeApp.intIO$i <-- gtpUser.appOut;
+		
+		
+        for i=0..numVUE-1 {
+            vUeApp.extIO[i] <--> app[i];
         }
 
-        for i=0..sizeof(app)-1 {
-            vUeApp[i].extIO <--> app++;
-        }
+        virtualRouter.ipIn <-- lteNic.toRouter;
+        virtualRouter.ipOut --> lteNic.fromRouter;
 }

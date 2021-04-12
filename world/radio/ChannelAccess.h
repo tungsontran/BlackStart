@@ -67,7 +67,7 @@ class ChannelAccess : public cSimpleModule, public cListener
      *
      * ChannelAccess is subscribed to position changes.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *) override;
 
     /** Finds the channelControl module in the network */
     IChannelControl *getChannelControl();

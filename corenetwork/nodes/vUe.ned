@@ -77,7 +77,7 @@ module vUe
                 @display("p=273.30402,29.052");
         }
     connections allowunconnected:
-        vUeApp.extIO <--> app;
+        vUeApp.extIO++ <--> app;
 
         vUeApp.intIO$o --> lteNic.upperLayerIn;
         vUeApp.intIO$i <-- lteNic.upperLayerOut;

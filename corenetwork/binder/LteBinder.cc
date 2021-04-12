@@ -210,9 +210,19 @@ void LteBinder::registerName(MacNodeId nodeId, const char* moduleName)
 
 const char* LteBinder::getModuleNameByMacNodeId(MacNodeId nodeId)
 {
-    if (macNodeIdToModuleName_.find(nodeId) == macNodeIdToModuleName_.end())
+    std::map<MacNodeId,char*>::iterator it = macNodeIdToModuleName_.find(nodeId);
+    if (it == macNodeIdToModuleName_.end())
         throw cRuntimeError("LteBinder::getModuleNameByMacNodeId - node ID not found");
     return macNodeIdToModuleName_[nodeId];
+}
+
+L3Address LteBinder::getL3Address(MacNodeId id)
+{
+    EV << "LteBinder::getL3Address - Getting L3Address of node " << id;
+    const char* symbolicName = getModuleNameByMacNodeId(id);
+    const L3Address addr = L3AddressResolver().resolve(symbolicName);
+    EV << ", got address " << addr << endl;
+    return addr;
 }
 
 ConnectedUesMap LteBinder::getDeployedUes(MacNodeId localId, Direction dir)

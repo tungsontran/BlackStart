@@ -54,6 +54,12 @@ LteNodeSubType getNodeSubTypeById(MacNodeId nodeId)
     return moduleSubType;
 }
 
+MacNodeId getOwnerId(MacNodeId nodeId)
+{
+    MacNodeId ownerId = getBinder()->getMacFromMacNodeId(nodeId)->getParentModule()->getAncestorPar("ownerId");
+    return ownerId;
+}
+
 const std::string lteTrafficClassToA(LteTrafficClass type)
 {
     switch (type)

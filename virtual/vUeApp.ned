@@ -19,8 +19,9 @@ simple vUeApp
 
 {
     parameters:
+        int numVUE = default(0);
         @display("i=block/app");
     gates:
-        inout extIO;        
+        inout extIO[numVUE];        
 		inout intIO;
 }

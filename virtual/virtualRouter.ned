@@ -17,5 +17,10 @@ package lte.virtual;
 
 simple virtualRouter
 {
-    
+    parameters:
+        double lsaTimer;
+        double lsaStart;
+    gates:
+        input ipIn @labels(RoutingTableMsg/up);
+        output ipOut @labels(RoutingTableMsg/down);
 }

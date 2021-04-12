@@ -21,20 +21,19 @@ void vUeApp::initialize(int stage)
 
 LteNodeType vUeApp::selectOwnerType(const char * type)
 {
-    EV << "localApp::selectOwnerType - setting owner type to " << type << endl;
+    EV << "vUeApp::selectOwnerType - setting owner type to " << type << endl;
     if(strcmp(type,"ENODEB") == 0)
         return ENODEB;
     if(strcmp(type,"UE") != 0)
-        error("localApp::selectOwnerType - unknown owner type [%s]. Aborting...",type);
+        error("vUeApp::selectOwnerType - unknown owner type [%s]. Aborting...",type);
     return UE;
 }
 
 void vUeApp::handleMessage(cMessage *msg)
 {
-    if (strcmp(msg->getArrivalGate()->getFullName(), "extIO$i") == 0)
+    if (strstr(msg->getArrivalGate()->getFullName(), "extIO$i") != nullptr)
     {
-        IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
-        handleFromExternal(datagram);
+        handleFromExternal(msg);
     }
     else if(strcmp(msg->getArrivalGate()->getFullName(),"intIO$i")==0)
     {
@@ -43,40 +42,50 @@ void vUeApp::handleMessage(cMessage *msg)
     }
 }
 
-void vUeApp::handleFromExternal(IPv4Datagram *pkt)
+void vUeApp::handleFromExternal(cMessage *pkt)
 {
-    IPv4Datagram * datagram;
     // from vUE of this ENB
     if (ownerType_ == ENODEB)
     {
-        datagram = check_and_cast<IPv4Datagram*>(pkt);
-        EV << "localApp::handleMessage - message from virtual UE, forwarding to GtpUser" << endl;
+        EV << "vUeApp::handleMessage - message from virtual UE, forwarding to GtpUser" << endl;
     }
     // from ENB of this vUE
     else if (ownerType_ == UE)
     {   //@TODO
-        EV << "localApp::handleMessage - message from ENB, forwarding to stack" << endl;
+        EV << "vUeApp::handleMessage - message from ENB, forwarding to stack" << endl;
     }
-    send(datagram,"intIO$o");
+    send(pkt,"intIO$o");
 }
 
 void vUeApp::handleFromInternal(IPv4Datagram *pkt)
 {
-    IPv4Datagram * datagram;
-    // from GTP-U of E2NB
-    if (ownerType_ == ENODEB)
-    {   //@TODO
-        IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(pkt);
-        EV << "localApp::handleMessage - message from GtpUser, forwarding to virtual UE" << endl;
-    }
+    L3Address srcAddr = pkt->getSourceAddress();
+    cPacket* msg = nullptr;
     // from stack of vUE
-    else if (ownerType_ == UE)
+    if (ownerType_ == UE)
     {
-        datagram = check_and_cast<IPv4Datagram*>(pkt->decapsulate());
-        delete(pkt);
-        EV << "localApp::handleMessage - message from stack, forwarding to ENB" << endl;
+        if (!strcmp(pkt->getName(),"LSA_HELLO"))
+        {
+            msg = check_and_cast<RoutingTableMsg*>(pkt->decapsulate());
+            delete(pkt);
+            EV << "vUeApp::handleMessage - message from stack, forwarding to ENB" << endl;
+        }
+        else
+        {
+            msg = check_and_cast<IPv4Datagram*>(pkt->decapsulate());
+            delete(pkt);
+            EV << "vUeApp::handleMessage - message from stack, forwarding to ENB" << endl;
+        }
+        send(msg,"extIO$o",0);
     }
-    send(datagram,"extIO$o");
+    // from GTP-U of E2NB
+    else if (ownerType_ == ENODEB)
+    {
+        std::string vUEname = binder_->getModuleNameByMacNodeId(binder_->getMacNodeId(srcAddr.toIPv4()));
+        int vUeindex = vUEname.at(vUEname.length()-2)-'0';
+        EV << "vUeApp::handleMessage - message from GtpUser, forwarding to virtual UE" << endl;
+        send(msg,"extIO$o",vUeindex);
+    }
 }
 
 void vUeApp::sendUeList()

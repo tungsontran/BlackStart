@@ -34,6 +34,8 @@ moduleinterface ILteNic extends IWirelessNic
     gates:
         inout EUTRAN_RRC_Sap;   // Control of RRC Layer
         inout x2[] @loose;     // optional x2 manager
+        input fromRouter;
+	    output toRouter;
 }
 
 // 
@@ -67,6 +69,8 @@ module LteNicBase like ILteNic
         output upperLayerOut;
         input radioIn @loose;  // to receive messages sent using sendDirect()
         inout x2[] @loose;     // optional x2 manager
+        input fromRouter;
+	    output toRouter;
 
     submodules:
         // bridge between lte stack and network layer
@@ -100,8 +104,10 @@ module LteNicBase like ILteNic
             @display("p=44.8,389.75998");
         }
 
-    connections:
-        ip2lte.stackLte <--> pdcpRrc.DataPort;
+    connections allowunconnected:
+        ip2lte.stackLte <--> pdcpRrc.DataPort;                
+        ip2lte.fromRouter <-- fromRouter;
+        ip2lte.toRouter --> toRouter;
 
         //#
         //# Internal LTE Stack Connections 
@@ -173,7 +179,7 @@ module LteNicEnb extends LteNicBase
         d2dCapable = default(false);          // DO NOT CHANGE
         bool compEnabled = default(false);
         string LteCompManagerType = default("LteCompManagerProportional");
-
+	   
     submodules:
         //#
         //# X2 manager
@@ -190,8 +196,8 @@ module LteNicEnb extends LteNicBase
         }
         handoverManager: LteHandoverManager {
             @display("p=60,142,row");
-        }
-
+        }        
+	     
     connections:
         //# connections between X2 Manager and its users
         compManager.x2ManagerIn <-- x2Manager.dataPort$o++ if compEnabled;

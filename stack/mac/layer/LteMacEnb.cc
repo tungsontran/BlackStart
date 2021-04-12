@@ -50,6 +50,7 @@ LteMacEnb::~LteMacEnb()
     delete amc_;
     delete enbSchedulerDl_;
     delete enbSchedulerUl_;
+//    cancelAndDelete(lsa_);
 
     LteMacBufferMap::iterator bit;
     for (bit = bsrbuf_.begin(); bit != bsrbuf_.end(); bit++)
@@ -819,7 +820,7 @@ void LteMacEnb::handleSelfMessage()
      *  MAIN LOOP  *
      ***************/
 
-    EV << "-----" << "ENB MAIN LOOP -----" << endl;
+    EV << "-----" << "ENB "<< nodeId_ <<" MAIN LOOP -----" << endl;
 
     /*************
      * END DEBUG
@@ -937,8 +938,8 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
         }
     }
     ueCqi ueCqi_ = getAmc()->getUeCqi();
-    virtualRouter_->setVirtualNetInfo(ueCqi_);
-    virtualRouter_->printInfo();
+    virtualRouter_->setDirectNeighbors(ueCqi_);
+    virtualRouter_->printDirectNeighbors();
     delete fb;
 }
 

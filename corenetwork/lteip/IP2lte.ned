@@ -29,6 +29,9 @@ simple IP2lte
         input upperLayerIn;
         output upperLayerOut;
 
+		input fromRouter;
+		output toRouter;
+		
         // connection to the lte stack
         inout stackLte @labels(IPDatagram);
 }

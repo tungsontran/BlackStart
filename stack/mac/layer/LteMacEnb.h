@@ -38,7 +38,6 @@ class LteMacEnb : public LteMacBase
 
     int eNodeBCount;
 
-//    ueCqi* ueCqi_;
     virtualRouter* virtualRouter_;
     /**
      * Variable used for Downlink energy consumption computation

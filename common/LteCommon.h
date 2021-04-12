@@ -510,12 +510,21 @@ LteNodeSubType getNodeSubType(const char * subType);
 LteNodeSubType getNodeSubTypeById(MacNodeId nodeId);
 
 /* for E2NB virtual routing */
-// Associate UE ID with corresponding CQI
+enum virtualRouterState
+{
+    DOWN, INIT, TWO_WAY, EXSTART, EXCHANGE, LOADING, FULL
+};
+
+// vUE ID, CQI
 typedef std::map<MacNodeId,Cqi> ueCqi;
-// Associate ENB ID with corresponding connected UEs
-typedef std::pair<MacNodeId,ueCqi> virtualNetInfo;
+// vUE ID, Owner E2NB ID, CQI
+typedef std::map<MacNodeId,std::pair<MacNodeId,Cqi>> ueEnbCqi;
+// Master E2NB ID, vUE ID, Owner E2NB ID, CQI
+typedef std::pair<MacNodeId,ueEnbCqi> virtualRoutingTableEntry;
 // Store network information of net info pairs
-typedef std::map<MacNodeId,ueCqi> virtualRoutingTable;
+typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
+// Get ownerId of vUE
+MacNodeId getOwnerId(MacNodeId nodeId);
 
 struct LteNodeTable
 {

@@ -6,6 +6,7 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "common/LteCommon.h"
 #include "epc/gtp_common.h"
+#include "virtual/packet/RoutingTableMsg.h"
 
 class vUeApp : public cSimpleModule
 {
@@ -22,7 +23,7 @@ class vUeApp : public cSimpleModule
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void handleFromInternal(IPv4Datagram *pkt);
-        virtual void handleFromExternal(IPv4Datagram *pkt);
+        virtual void handleFromExternal(cMessage *pkt);
         virtual void sendUeList();
 };
 

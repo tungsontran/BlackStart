@@ -446,36 +446,45 @@ std::vector<double> LteRealisticChannelModel::getSINR(LteAirFrame *frame, UserCo
     */
    else // UL/DL CQI & UL error computation
    {
+       const char* nodeType = getParentModule()->getAncestorPar("nodeType");
        // get MacId for Ue and eNb
        ueId = lteInfo->getSourceId();
        eNbId = lteInfo->getDestId();
+       speed = computeSpeed(ueId, coord);
 
        if (dir == DL)
        {
-           //set noise Figure
-           noiseFigure = ueNoiseFigure_; //dB
-           //set antenna gain Figure
-           antennaGainTx = antennaGainEnB_; //dB
-           antennaGainRx = antennaGainUe_;  //dB
+          //set noise Figure
+          noiseFigure = ueNoiseFigure_; //dB
+          //set antenna gain Figure
+          antennaGainTx = antennaGainEnB_; //dB
+          antennaGainRx = antennaGainUe_;  //dB
 
-           // use the jakes map in the UE side
-           cqiDl = true;
+          // use the jakes map in the UE side
+          cqiDl = true;
        }
        else // if( dir == UL )
        {
-           // TODO check if antennaGainEnB should be added in UL direction too
-           antennaGainTx = antennaGainUe_;
-           antennaGainRx = antennaGainEnB_;
-           noiseFigure = bsNoiseFigure_;
+          // TODO check if antennaGainEnB should be added in UL direction too
+          antennaGainTx = antennaGainUe_;
+          antennaGainRx = antennaGainEnB_;
+          noiseFigure = bsNoiseFigure_;
 
-           // use the jakes map in the eNb side
-           cqiDl = false;
+          // use the jakes map in the eNb side
+          cqiDl = false;
        }
-       speed = computeSpeed(ueId, coord);
 
-       // get position of Ue and eNb
-       ueCoord = coord;
-       enbCoord = phy_->getCoord();
+       if (!strcmp(nodeType,"ENODEB"))
+       {
+           // get position of Ue and eNb
+           ueCoord = coord;
+           enbCoord = phy_->getCoord();
+       }
+       else
+       {
+           ueCoord = phy_->getCoord();
+           enbCoord = coord;
+       }
    }
 
    LteCellInfo* eNbCell = getCellInfo(eNbId);
@@ -487,8 +496,8 @@ std::vector<double> LteRealisticChannelModel::getSINR(LteAirFrame *frame, UserCo
                       << " - frameType=" << ((lteInfo->getFrameType()==FEEDBACKPKT)?"feedback":"other")
                       << endl
                       << eNbTypeString << " - txPwr " << lteInfo->getTxPower()
-                      << " - ueCoord[" << ueCoord << "] - enbCoord[" << enbCoord << "] - ueId[" << ueId << "] - enbId[" << eNbId << "]" <<
-                      endl;
+                      << " - ueCoord[" << ueCoord << "] - enbCoord[" << enbCoord << "] - ueId[" << ueId << "] - enbId[" << eNbId << "]"
+                      << endl;
    //=================== END PARAMETERS SETUP =======================
 
    //=============== PATH LOSS + SHADOWING + FADING =================
@@ -579,16 +588,17 @@ std::vector<double> LteRealisticChannelModel::getSINR(LteAirFrame *frame, UserCo
        }
 
        EV << " LteRealisticChannelModel::getSINR node " << ueId
-          << ((lteInfo->getFrameType() == FEEDBACKPKT) ?
-           " FEEDBACK PACKET " : " NORMAL PACKET ")
-          << " band " << i << " recvPower " << recvPower
-          << " direction " << dirToA(dir) << " antenna gain tx "
-          << antennaGainTx << " antenna gain rx " << antennaGainRx
-          << " noise figure " << noiseFigure
-          << " cable loss   " << cableLoss_
-          << " attenuation (pathloss + shadowing) " << attenuation
-          << " speed " << speed << " thermal noise " << thermalNoise_
-          << " fading attenuation " << fadingAttenuation << endl;
+          << ((lteInfo->getFrameType() == FEEDBACKPKT) ? ", FEEDBACK PACKET " : ", NORMAL PACKET ")
+          << ", band " << i
+          << ", recvPower " << recvPower
+          << ", direction " << dirToA(dir)
+          << ", antenna gain tx " << antennaGainTx
+          << ", antenna gain rx " << antennaGainRx
+          << ", noise figure " << noiseFigure
+          << ", cable loss " << cableLoss_
+          << ", attenuation (pathloss + shadowing) " << attenuation
+          << ", speed " << speed << " thermal noise " << thermalNoise_
+          << ", fading attenuation " << fadingAttenuation << endl;
 
        snrVector[i] = finalRecvPower;
    }
@@ -1893,9 +1903,7 @@ bool LteRealisticChannelModel::computeExtCellInterference(MacNodeId eNbId, MacNo
        // computer distance between UE and the ext cell
        dist = coord.distance(c);
 
-       EV << "\t distance between UE[" << coord.x << "," << coord.y <<
-               "] and extCell[" << c.x << "," << c.y << "] is -> "
-               << dist << "\t";
+       EV << "\t distance between UE[" << coord.x << "," << coord.y << "] and extCell[" << c.x << "," << c.y << "] is -> "<< dist << endl;
 
        // compute attenuation according to some path loss model
        att = computeExtCellPathLoss(dist, nodeId);

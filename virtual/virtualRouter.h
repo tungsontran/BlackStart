@@ -18,23 +18,48 @@
 
 #include <omnetpp.h>
 #include "common/LteCommon.h"
+#include "virtual/packet/RoutingTableMsg.h"
+#include "corenetwork/binder/LteBinder.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 using namespace omnetpp;
 
 class virtualRouter : public cSimpleModule
 {
+    LteBinder* binder_;
+    /// Link State self message
+    cMessage* lsa_;
+    double lsaTimer_;
+    double lsaStart_;
   protected:
-    virtualNetInfo info_;
+    virtualRouterState* state_;
+
+    virtualRoutingTableEntry directNeighbors_;
     MacNodeId nodeId_;
-    virtualRoutingTable table_;
-    virtual void initialize();
+    virtualRoutingTable directNeighborsTable_;
+    virtualRoutingTable networkTopoTable_;
+    virtualRoutingTable actualRoutingTable_;
+
+    simsignal_t sendLsaHello;
+
+    virtual void initialize(int stage) override;
   public:
-    void setVirtualNetInfo(const ueCqi uecqi);
-    virtualNetInfo getVirtualNetInfo() const;
-    void addToVirtualRoutingTable(const virtualNetInfo info);
-    virtualRoutingTable getVirtualRoutingTable() const;
-    void printInfo() const;
-    void printTable() const;
+//    virtualRouter();
+    virtual ~virtualRouter();
+    virtualRoutingTableEntry getTableEntry(const MacNodeId nodeId, const virtualRoutingTable table);
+    void addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry);
+    void setDirectNeighbors(const ueCqi uecqi);
+    virtualRoutingTable getDirectNeighborsTable() const;
+    void setDirectNeighborsTable(const virtualRoutingTableEntry entry);
+    virtualRoutingTable getNetworkTopoTable() const;
+    void setNetworkTopoTable(const virtualRoutingTableEntry entry);
+    virtualRoutingTable getActualRoutingTable() const;
+    void setActualRoutingTable(const virtualRoutingTableEntry entry);
+    void printDirectNeighbors() const;
+    void printTable(const virtualRoutingTable table, const char* name);
+
+    void sendLSA();
+    virtual void handleMessage(cMessage *msg) override;
 };
 
 #endif

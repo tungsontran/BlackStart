@@ -14,6 +14,7 @@
 #include "common/LteControlInfo.h"
 #include "common/LteControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "virtual/packet/RoutingTableMsg.h"
 #include "stack/handoverManager/LteHandoverManager.h"
 #include "corenetwork/binder/LteBinder.h"
 
@@ -29,6 +30,7 @@ class IP2lte : public cSimpleModule
 {
     cGate *stackGateOut_;       // gate connecting IP2lte module to LTE stack
     cGate *ipGateOut_;          // gate connecting IP2lte module to network layer
+    cGate *routerGateOut_;      // gate connecting IP2lte module to virtual router
     LteNodeType nodeType_;      // node type: can be ENODEB, UE
 
     // datagram sequence numbers (one for each flow)
@@ -79,6 +81,7 @@ class IP2lte : public cSimpleModule
 
     void fromIpEnb(IPv4Datagram * datagram);
     void toIpEnb(cMessage * msg);
+    void toRouter(RoutingTableMsg* msg);
     void toStackEnb(IPv4Datagram* datagram);
 
     /**

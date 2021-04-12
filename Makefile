@@ -141,6 +141,7 @@ OBJS = \
     $O/virtual/CoeController.o \
     $O/virtual/virtualRouter.o \
     $O/virtual/vUeApp.o \
+    $O/virtual/packet/RoutingTableMsg.o \
     $O/world/radio/ChannelAccess.o \
     $O/world/radio/ChannelControl.o \
     $O/world/radio/LteChannelControl.o \
@@ -174,6 +175,7 @@ OBJS = \
     $O/stack/rlc/packet/LteRlcDataPdu_m.o \
     $O/stack/rlc/packet/LteRlcPdu_m.o \
     $O/stack/rlc/packet/LteRlcSdu_m.o \
+    $O/virtual/packet/RoutingTableMsg_m.o \
     $O/x2/packet/LteX2Message_m.o \
     $O/x2/packet/X2ControlInfo_m.o
 
@@ -206,6 +208,7 @@ MSGFILES = \
     stack/rlc/packet/LteRlcDataPdu.msg \
     stack/rlc/packet/LteRlcPdu.msg \
     stack/rlc/packet/LteRlcSdu.msg \
+    virtual/packet/RoutingTableMsg.msg \
     x2/packet/LteX2Message.msg \
     x2/packet/X2ControlInfo.msg
 
