@@ -97,52 +97,7 @@ void LtePhyUe::initialize(int stage)
         // find the best candidate master cell
         if (dynamicCellAssociation_)
         {
-            // this is a fictitious frame that needs to compute the SINR
-            LteAirFrame *frame = new LteAirFrame("cellSelectionFrame");
-            UserControlInfo *cInfo = new UserControlInfo();
-
-            // get the list of all eNodeBs in the network
-            std::vector<EnbInfo*>* enbList = binder_->getEnbList();
-            std::vector<EnbInfo*>::iterator it = enbList->begin();
-            for (; it != enbList->end(); ++it)
-            {
-                MacNodeId cellId = (*it)->id;
-                LtePhyBase* cellPhy = check_and_cast<LtePhyBase*>((*it)->eNodeB->getSubmodule("lteNic")->getSubmodule("phy"));
-                double cellTxPower = cellPhy->getTxPwr();
-                Coord cellPos = cellPhy->getCoord();
-
-                // build a control info
-                cInfo->setDirection(UL);
-                cInfo->setSourceId(nodeId_);
-                cInfo->setDestId(cellId);
-                cInfo->setTxPower(cellTxPower);
-                cInfo->setCoord(cellPos);
-                cInfo->setFrameType(FEEDBACKPKT);
-
-                // get RSSI from the eNB
-                std::vector<double>::iterator it;
-                double rssi = 0;
-                std::vector<double> rssiV = channelModel_->getSINR(frame, cInfo);
-                for (it = rssiV.begin(); it != rssiV.end(); ++it)
-                    rssi += *it;
-                rssi /= rssiV.size();   // compute the mean over all RBs
-
-                EV << "LtePhyUe::initialize - RSSI from eNodeB " << cellId << ": " << rssi << " dB (current candidate eNodeB " << candidateMasterId_ << ": " << candidateMasterRssi_ << " dB" << endl;
-
-                if (rssi > candidateMasterRssi_)
-                {
-                    candidateMasterId_ = cellId;
-                    candidateMasterRssi_ = rssi;
-                }
-            }
-            delete cInfo;
-            delete frame;
-
-            // set serving cell
-            masterId_ = candidateMasterId_;
-            getAncestorPar("masterId").setIntValue(masterId_);
-            currentMasterRssi_ = candidateMasterRssi_;
-            updateHysteresisTh(candidateMasterRssi_);
+            dynamicCellAsociate();
         }
         else
         {
@@ -167,6 +122,70 @@ void LtePhyUe::initialize(int stage)
         cellInfo_->lambdaInit(nodeId_, index);
         cellInfo_->channelUpdate(nodeId_, intuniform(1, binder_->phyPisaData.maxChannel2()));
     }
+}
+
+void LtePhyUe::dynamicCellAsociate()
+{
+    // check if this UE is a vUE
+    MacNodeId ownerId;
+    LteNodeSubType nodeSubType = getNodeSubType(getParentModule()->getParentModule()->getAncestorPar("nodeSubType"));
+    if (nodeSubType == VUE)
+    {
+        ownerId = getParentModule()->getParentModule()->getAncestorPar("ownerId");
+    }
+
+    // this is a fictitious frame that needs to compute the SINR
+    LteAirFrame *frame = new LteAirFrame("cellSelectionFrame");
+    UserControlInfo *cInfo = new UserControlInfo();
+
+    // get the list of all eNodeBs in the network
+    std::vector<EnbInfo*>* enbList = binder_->getEnbList();
+    std::vector<EnbInfo*>::iterator it = enbList->begin();
+    for (; it != enbList->end(); ++it)
+    {
+        MacNodeId cellId = (*it)->id;
+        LtePhyBase* cellPhy = check_and_cast<LtePhyBase*>((*it)->eNodeB->getSubmodule("lteNic")->getSubmodule("phy"));
+        double cellTxPower = cellPhy->getTxPwr();
+        Coord cellPos = cellPhy->getCoord();
+
+        // build a control info
+        cInfo->setDirection(UL);
+        cInfo->setSourceId(nodeId_);
+        cInfo->setDestId(cellId);
+        cInfo->setTxPower(cellTxPower);
+        cInfo->setCoord(cellPos);
+        cInfo->setFrameType(FEEDBACKPKT);
+
+        // get RSSI from the eNB
+        std::vector<double>::iterator it;
+        double rssi = 0;
+        std::vector<double> rssiV = channelModel_->getSINR(frame, cInfo);
+        for (it = rssiV.begin(); it != rssiV.end(); ++it)
+            rssi += *it;
+        rssi /= rssiV.size();   // compute the mean over all RBs
+
+        EV << "LtePhyUe::initialize - RSSI from eNodeB " << cellId << ": " << rssi << " dB (current candidate eNodeB " << candidateMasterId_ << ": " << candidateMasterRssi_ << " dB" << endl;
+
+        if (cellId == ownerId)
+        {
+            EV << "This is an owner ENB. Will not attach to it." << endl;
+            continue;
+        }
+
+        if (rssi > candidateMasterRssi_)
+        {
+            candidateMasterId_ = cellId;
+            candidateMasterRssi_ = rssi;
+        }
+    }
+    delete cInfo;
+    delete frame;
+
+    // set serving cell
+    masterId_ = candidateMasterId_;
+    getAncestorPar("masterId").setIntValue(masterId_);
+    currentMasterRssi_ = candidateMasterRssi_;
+    updateHysteresisTh(candidateMasterRssi_);
 }
 
 void LtePhyUe::handleSelfMessage(cMessage *msg)

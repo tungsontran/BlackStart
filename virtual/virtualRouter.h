@@ -21,6 +21,7 @@
 #include "virtual/packet/RoutingTableMsg.h"
 #include "corenetwork/binder/LteBinder.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "virtual/algorithm/dijkstra.h"
 
 using namespace omnetpp;
 
@@ -32,10 +33,11 @@ class virtualRouter : public cSimpleModule
     double lsaTimer_;
     double lsaStart_;
   protected:
+    MacNodeId nodeId_;
     virtualRouterState* state_;
 
     virtualRoutingTableEntry directNeighbors_;
-    MacNodeId nodeId_;
+
     virtualRoutingTable directNeighborsTable_;
     virtualRoutingTable networkTopoTable_;
     virtualRoutingTable actualRoutingTable_;
@@ -46,20 +48,18 @@ class virtualRouter : public cSimpleModule
   public:
 //    virtualRouter();
     virtual ~virtualRouter();
-    virtualRoutingTableEntry getTableEntry(const MacNodeId nodeId, const virtualRoutingTable table);
     void addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry);
     void setDirectNeighbors(const ueCqi uecqi);
-    virtualRoutingTable getDirectNeighborsTable() const;
     void setDirectNeighborsTable(const virtualRoutingTableEntry entry);
+    virtualRoutingTable getDirectNeighborsTable() const;
     virtualRoutingTable getNetworkTopoTable() const;
-    void setNetworkTopoTable(const virtualRoutingTableEntry entry);
     virtualRoutingTable getActualRoutingTable() const;
-    void setActualRoutingTable(const virtualRoutingTableEntry entry);
     void printDirectNeighbors() const;
     void printTable(const virtualRoutingTable table, const char* name);
-
-    void sendLSA();
     virtual void handleMessage(cMessage *msg) override;
+    void sendLSA();
+    void createAdjMatrix();
+    void computeRoute();
 };
 
 #endif

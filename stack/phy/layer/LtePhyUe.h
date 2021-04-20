@@ -97,10 +97,11 @@ class LtePhyUe : public LtePhyBase
     virtual void initialize(int stage)override ;
     virtual void handleSelfMessage(cMessage *msg) override;
     virtual void handleAirFrame(cMessage* msg) override;
-    virtual void finish();
+    virtual void finish() override;
 
     virtual void handleUpperMessage(cMessage* msg) override;
 
+    void dynamicCellAsociate();
     /**
      * Catches host failure due to battery depletion.
      *

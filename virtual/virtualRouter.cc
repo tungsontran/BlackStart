@@ -105,11 +105,6 @@ void virtualRouter::setDirectNeighbors(const ueCqi uecqi)
     addTableEntry(networkTopoTable_, directNeighbors_);
 }
 
-virtualRoutingTableEntry virtualRouter::getTableEntry(const MacNodeId nodeId, const virtualRoutingTable table)
-{
-
-}
-
 virtualRoutingTable virtualRouter::getDirectNeighborsTable() const
 {
     return directNeighborsTable_;
@@ -150,7 +145,7 @@ void virtualRouter::printTable(const virtualRoutingTable table, const char* name
             EV << "Owner ENB " << ueenbcqi.second.first << ", vUE " << ueenbcqi.first << ", CQI = " << ueenbcqi.second.second << endl;
         } //@TODO direct master
     }
-    EV << "virtualRouter::printTable(): *********************************" << endl;
+    EV << "virtualRouter::printTable(): ***** End Print Table *****" << endl;
 }
 
 void virtualRouter::handleMessage(cMessage *msg)
@@ -213,4 +208,28 @@ void virtualRouter::sendLSA()
 
 //        emit(sendLsaHello,datagram);
     }
+}
+
+void virtualRouter::createAdjMatrix()
+{
+    ASSERT(!networkTopoTable_.empty());
+
+    // get number of vertice from network topo table
+    int v = networkTopoTable_.size();
+
+    virtualRoutingTable::iterator it;
+    ueEnbCqi::iterator jt;
+    for (auto it: networkTopoTable_)
+    {
+       MacNodeId u = it.first;
+       for (auto jt: it.second)
+       {
+           MacNodeId v = jt.second.first;
+       }
+    }
+}
+
+void virtualRouter::computeRoute()
+{
+
 }
