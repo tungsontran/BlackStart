@@ -24,16 +24,6 @@ e2NodeBMode getE2NodeBMode(const char * mode)
     return NORMAL;
 }
 
-e2NodeBDirection getE2NodeBDirection(const char * direction)
-{
-    EV << "getE2NodeBDirection - getting E2NodeB direction as " << direction << endl;
-    if(strcmp(direction,"UPLINK") == 0)
-        return UPLINK;
-    if(strcmp(direction,"DOWNLINK") != 0)
-        throw cRuntimeError("GtpUserSimplified::getE2NodeBDirection - unknown E2NodeB direction: [%s]. Aborting...",direction);
-    return DOWNLINK;
-}
-
 LteNodeSubType getNodeSubType(const char * subtype)
 {
     EV << "getNodeSubType - getting node subtype as " << subtype << endl;
@@ -58,6 +48,15 @@ MacNodeId getOwnerId(MacNodeId nodeId)
 {
     MacNodeId ownerId = getBinder()->getMacFromMacNodeId(nodeId)->getParentModule()->getAncestorPar("ownerId");
     return ownerId;
+}
+
+bool isOwner(MacNodeId vUE, MacNodeId eNB)
+{
+    MacNodeId owner = getOwnerId(vUE);
+    if (owner == eNB)
+        return true;
+    else
+        return false;
 }
 
 const std::string lteTrafficClassToA(LteTrafficClass type)

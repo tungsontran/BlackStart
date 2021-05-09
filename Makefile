@@ -141,6 +141,9 @@ OBJS = \
     $O/virtual/CoeController.o \
     $O/virtual/virtualRouter.o \
     $O/virtual/vUeApp.o \
+    $O/virtual/algorithm/common.o \
+    $O/virtual/algorithm/dijkstra.o \
+    $O/virtual/algorithm/Graph.o \
     $O/virtual/packet/RoutingTableMsg.o \
     $O/world/radio/ChannelAccess.o \
     $O/world/radio/ChannelControl.o \

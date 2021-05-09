@@ -18,6 +18,14 @@ using namespace std;
 
 Define_Module(LteBinder);
 
+void LteBinder::initialize(int stage)
+{
+    if (stage == inet::INITSTAGE_LOCAL)
+    {
+        numBands_ = par("numBands");
+    }
+}
+
 void LteBinder::unregisterNode(MacNodeId id)
 {
     EV << NOW << " LteBinder::unregisterNode - unregistering node " << id << endl;
@@ -48,7 +56,7 @@ void LteBinder::unregisterNode(MacNodeId id)
         EV_ERROR << "Cannot unregister node - node id \"" << id << "\" - not found";
     }
 
-    // remove 'id' from LteMacBase* cache but do not delte pointer.
+    // remove 'id' from LteMacBase* cache but do not delete pointer.
     if(macNodeIdToModule_.erase(id) != 1){
         EV_ERROR << "Cannot unregister node - node id \"" << id << "\" - not found";
     }
@@ -80,7 +88,11 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type, MacNodeId m
 
     if (type == UE)
     {
-        macNodeId = macNodeIdCounter_[2]++;
+        LteNodeSubType subtype = getNodeSubType(module->par("nodeSubType"));
+        if (subtype == NONE)
+            macNodeId = macNodeIdCounter_[2]++;
+        else if (subtype == VUE)
+            macNodeId = macNodeIdCounter_[3]++;
     }
     else if (type == RELAY)
     {
@@ -116,8 +128,7 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type, MacNodeId m
 void LteBinder::registerNextHop(MacNodeId masterId, MacNodeId slaveId)
 {
     Enter_Method_Silent("registerNextHop");
-    EV << "LteBinder : Registering slave " << slaveId << " to master "
-       << masterId << "\n";
+    EV << "LteBinder : Registering slave " << slaveId << " to master " << masterId << endl;
 
     if (masterId != slaveId)
     {
@@ -129,19 +140,10 @@ void LteBinder::registerNextHop(MacNodeId masterId, MacNodeId slaveId)
     nextHop_[slaveId] = masterId;
 }
 
-void LteBinder::initialize(int stage)
-{
-    if (stage == inet::INITSTAGE_LOCAL)
-    {
-        numBands_ = par("numBands");
-    }
-}
-
 void LteBinder::unregisterNextHop(MacNodeId masterId, MacNodeId slaveId)
 {
     Enter_Method_Silent("unregisterNextHop");
-    EV << "LteBinder : Unregistering slave " << slaveId << " from master "
-       << masterId << "\n";
+    EV << "LteBinder : Unregistering slave " << slaveId << " from master " << masterId << endl;
     dMap_[masterId][slaveId] = false;
 
     if (nextHop_.size() <= slaveId)

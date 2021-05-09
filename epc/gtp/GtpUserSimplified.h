@@ -19,6 +19,7 @@
 #include "corenetwork/binder/LteBinder.h"
 #include <map>
 #include "epc/gtp_common.h"
+#include "virtual/virtualRouter.h"
 
 /**
  * GtpUserSimplified is used for building data tunnels between GTP peers.
@@ -32,8 +33,14 @@ class GtpUserSimplified : public cSimpleModule
     UDPSocket socket_;
     int localPort_;
 
+    MacNodeId nodeId_;
+
     // reference to the LTE Binder module
     LteBinder* binder_;
+
+    // reference to the virtual router
+    virtualRouter* vRouter_;
+
     /*
      * This table contains mapping between TrafficFlowTemplate (TFT) identifiers and the IP address
      * of the destination eNodeB. This table is populated by the eNodeBs at the beginning of the simulation
@@ -53,8 +60,6 @@ class GtpUserSimplified : public cSimpleModule
 
     e2NodeBMode mode_;
 
-    std::vector<e2NodeBDirection> directions_; // @TODO
-
     LteNodeSubType subType_;
 
   protected:
@@ -69,8 +74,13 @@ class GtpUserSimplified : public cSimpleModule
     // receive a GTP-U packet from UDP, reads the TEID and decides whether performing label switching or removal
     void handleFromUdp(GtpUserMsg * gtpMsg);
 
+    // receive and IP Datagram from the vUeApp
+    void handleFromApp(IPv4Datagram * datagram);
+
     LteNodeSubType getSrcNodeSubType(IPv4Datagram* datagram);
     LteNodeSubType getDstNodeSubType(IPv4Datagram* datagram);
+
+    void forward(IPv4Datagram* datagram);
 };
 
 #endif

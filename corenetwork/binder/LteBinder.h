@@ -60,8 +60,8 @@ class LteBinder : public cSimpleModule
     // list of all UEs. Used for inter-cell interference evaluation
     std::vector<UeInfo*> ueList_;
 
-    MacNodeId macNodeIdCounter_[3]; // MacNodeId Counter
-    DeployedUesMap dMap_; // DeployedUes --> Master Mapping
+    MacNodeId macNodeIdCounter_[4]; // MacNodeId Counter
+    DeployedUesMap dMap_; // Deployed Ues --> Master Mapping
 
     /*
      * Uplink interference support
@@ -114,6 +114,7 @@ class LteBinder : public cSimpleModule
         macNodeIdCounter_[0] = ENB_MIN_ID;
         macNodeIdCounter_[1] = RELAY_MIN_ID;
         macNodeIdCounter_[2] = UE_MIN_ID;
+        macNodeIdCounter_[3] = VUE_MIN_ID;
 
         ulTransmissionMap_.resize(2); // store transmission map of previous and current TTI
     }
@@ -129,6 +130,19 @@ class LteBinder : public cSimpleModule
             delete enbList_.back();
             enbList_.pop_back();
         }
+    }
+
+    /**
+     *
+     */
+    MacNodeId getNodeCounter(const char* type)
+    {
+        if (!strcmp(type,"ENB"))
+            return macNodeIdCounter_[0];
+        else if (!strcmp(type,"UE"))
+            return macNodeIdCounter_[2];
+        else if (!strcmp(type,"VUE"))
+            return macNodeIdCounter_[3];
     }
 
     /**
@@ -173,6 +187,17 @@ class LteBinder : public cSimpleModule
      * @param slaveId MacNodeId of the Slave
      */
     void unregisterNextHop(MacNodeId masterId, MacNodeId slaveId);
+
+    /**
+     * registerOwner() is called at the initialization of vUE
+     *
+     * Maps vUE with the owner ENB
+     * Different with getOwnerId in LteCommon because the other is a
+     * direct getter method and can be used even before the register process
+     *
+     * The vUE will never change owner so no need for unregistering
+     */
+    void registerOwner(MacNodeId ownerId, MacNodeId vUEId);
 
     /**
      * getOmnetId() returns the Omnet Id of the module

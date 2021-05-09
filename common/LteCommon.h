@@ -62,7 +62,9 @@ class ExtCell;
 #define RELAY_MIN_ID 257
 #define RELAY_MAX_ID 1023
 #define UE_MIN_ID 1025
-#define UE_MAX_ID 65535
+#define UE_MAX_ID 64003
+#define VUE_MIN_ID 64005
+#define VUE_MAX_ID 65535
 
 /// Max Number of Codewords
 #define MAX_CODEWORDS 2
@@ -506,7 +508,9 @@ enum LteNodeSubType
     VUE
 };
 
+// get enum subtype from string subtype
 LteNodeSubType getNodeSubType(const char * subType);
+// get subtype from node ID
 LteNodeSubType getNodeSubTypeById(MacNodeId nodeId);
 
 /* for E2NB virtual routing */
@@ -525,6 +529,8 @@ typedef std::pair<MacNodeId,ueEnbCqi> virtualRoutingTableEntry;
 typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
 // Get ownerId of vUE
 MacNodeId getOwnerId(MacNodeId nodeId);
+// check if this eNB is the owner of this vUE
+bool isOwner(MacNodeId vUE, MacNodeId eNB);
 
 struct LteNodeTable
 {
@@ -546,13 +552,6 @@ enum e2NodeBMode
 };
 
 e2NodeBMode getE2NodeBMode(const char * mode);
-
-enum e2NodeBDirection
-{
-    UPLINK, DOWNLINK
-};
-
-e2NodeBDirection getE2NodeBDirection(const char * direction);
 
 /**
  * Subframe type

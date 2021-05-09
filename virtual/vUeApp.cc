@@ -84,7 +84,7 @@ void vUeApp::handleFromInternal(IPv4Datagram *pkt)
         std::string vUEname = binder_->getModuleNameByMacNodeId(binder_->getMacNodeId(srcAddr.toIPv4()));
         int vUeindex = vUEname.at(vUEname.length()-2)-'0';
         EV << "vUeApp::handleMessage - message from GtpUser, forwarding to virtual UE" << endl;
-        send(msg,"extIO$o",vUeindex);
+        send(pkt,"extIO$o",vUeindex);
     }
 }
 

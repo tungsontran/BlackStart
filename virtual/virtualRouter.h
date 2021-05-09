@@ -28,10 +28,17 @@ using namespace omnetpp;
 class virtualRouter : public cSimpleModule
 {
     LteBinder* binder_;
-    /// Link State self message
+    // Link State self message
     cMessage* lsa_;
+    // Timer to send LSA again
     double lsaTimer_;
+    // Timer to start sending LSA
     double lsaStart_;
+    // adjacency map, maps nodeID to vertexID
+    adjMap adjmap_;
+    // adjacency matrix, represent topo
+    adjMatrix adj_;
+
   protected:
     MacNodeId nodeId_;
     virtualRouterState* state_;
@@ -48,18 +55,46 @@ class virtualRouter : public cSimpleModule
   public:
 //    virtualRouter();
     virtual ~virtualRouter();
+
+    /*
+     * Table setter methods
+     * */
+    // Add new entry to a table
     void addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry);
+    // Set information of direct neighbor nodes to the tables
     void setDirectNeighbors(const ueCqi uecqi);
-    void setDirectNeighborsTable(const virtualRoutingTableEntry entry);
+
+    /*
+     * Table getter methods
+     * */
     virtualRoutingTable getDirectNeighborsTable() const;
     virtualRoutingTable getNetworkTopoTable() const;
     virtualRoutingTable getActualRoutingTable() const;
+
+    /*
+     * Table printer methods
+     * */
+    // print neighbors information
     void printDirectNeighbors() const;
+    // print a table
     void printTable(const virtualRoutingTable table, const char* name);
+
+    /*
+     * LSA handler methods
+     * */
+    // handle LSA
     virtual void handleMessage(cMessage *msg) override;
+    // send LSA
     void sendLSA();
-    void createAdjMatrix();
-    void computeRoute();
+
+    /*
+     * Routing methods
+     * */
+    adjMap createAdjMap();
+    adjMatrix createAdjMatrix(adjMap& adjmap);
+    // return next hop for the shortest path to destination eNB
+    MacNodeId computeRoute(MacNodeId dst);
+
 };
 
 #endif

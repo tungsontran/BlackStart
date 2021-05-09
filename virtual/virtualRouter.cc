@@ -170,6 +170,9 @@ void virtualRouter::handleMessage(cMessage *msg)
                 addTableEntry(networkTopoTable_,*it);
             }
             printTable(networkTopoTable_,"Network Topo Table");
+            // create graph for routing, map all existing nodes to vertices
+            adjmap_ = createAdjMap();
+            adj_ = createAdjMatrix(adjmap_);
             delete(msg);
         }
     }
@@ -210,26 +213,55 @@ void virtualRouter::sendLSA()
     }
 }
 
-void virtualRouter::createAdjMatrix()
+adjMap virtualRouter::createAdjMap()
 {
-    ASSERT(!networkTopoTable_.empty());
-
-    // get number of vertice from network topo table
-    int v = networkTopoTable_.size();
-
-    virtualRoutingTable::iterator it;
-    ueEnbCqi::iterator jt;
-    for (auto it: networkTopoTable_)
-    {
-       MacNodeId u = it.first;
-       for (auto jt: it.second)
-       {
-           MacNodeId v = jt.second.first;
-       }
-    }
+    // map nodeID of all nodes (e2NB, vUE) to vertex ID
+    // eg: [1 2 3 64005 64006] -> [1 2 3 4 5]
+    MacNodeId enbCount = binder_->getNodeCounter("ENB");
+    MacNodeId vueCount = binder_->getNodeCounter("VUE");
+    adjMap adjmap = getAdjMap(enbCount,vueCount);
+    return adjmap;
 }
 
-void virtualRouter::computeRoute()
+adjMatrix virtualRouter::createAdjMatrix(adjMap& adjmap)
 {
+   // get the number of vertices for the adjacency matrix
+   int V = adjmap.size();
+   // initialize the adjacency matrix
+   adjMatrix adj(V);
+   // map value from network topo table (nodeID) to adjacency matrix (vertex ID)
+   for (auto it: networkTopoTable_)
+   {
+       MacNodeId u = getAdjIndex(adjmap, it.first);            // Master ID
+       for (auto jt: it.second)
+       {
+           MacNodeId v = getAdjIndex(adjmap, jt.first);        // vUE ID
+           Cqi w = 16 - jt.second.second;                      // weight
+           addEdge(adj,u,v,w);
+           MacNodeId o = getAdjIndex(adjmap, jt.second.first); // Owner ID
+           addEdge(adj,o,v,1);
+       }
+   }
+   EV << "***** Adjacency Matrix *****" << endl;
+   for (int i = 0; i < V; i++)
+   {
+       EV << "u: " << i << endl;
+       for (auto j: adj[i])
+       {
+           EV << "  v: " << j.first << ", w: " << j.second << endl;
+       }
+   }
+   EV << "****************************" << endl;
+   return adj;
+}
 
+MacNodeId virtualRouter::computeRoute(MacNodeId dest)
+{
+    assert(!adj_.empty() || !adjmap_.empty());
+    int V = adjmap_.size();
+    MacNodeId src = getAdjIndex(adjmap_,nodeId_);
+    MacNodeId dst = getAdjIndex(adjmap_,dest);
+    std::vector<MacNodeId> parent = dijkstra(adj_,V,src,adjmap_);
+    MacNodeId nextHop = adjmap_[getNextHop(parent, src, dst)];
+    return nextHop;
 }

@@ -24,7 +24,6 @@ module e2NodeB extends eNodeB
     parameters:
       	int numVUE;
         string mode = default("NORMAL");
-        string direction = default("DOWNLINK DOWNLINK DOWNLINK DOWNLINK DOWNLINK DOWNLINK");
         nodeSubType = "E2NODEB";
     gates:
         inout app[];
