@@ -42,7 +42,7 @@ void print_queue(T q) { // NB: pass by value so the print uses a copy
 std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjmap)
 {
     // create queue of ascending order
-    std::priority_queue<cqiWeight, std::vector<cqiWeight> , std::greater<cqiWeight>> pq;
+    std::priority_queue<weight, std::vector<weight> , std::greater<weight>> pq;
 
     // Create a vector for distances and initialize all distances as infinite
     std::vector<int> dist(V, INF);

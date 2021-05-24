@@ -291,7 +291,7 @@ void GtpUserSimplified::forward(IPv4Datagram* datagram)
     EV << "(" << nextHopName << ")" << endl;
     EV << "Next hop is " << nextHopName << " owned by "
     << binder_->getModuleNameByMacNodeId(getOwnerId(nextHopID)) << " that serves "
-    << binder_->getModuleNameByMacNodeId(dstMasterID);
+    << binder_->getModuleNameByMacNodeId(binder_->getNextHop(nextHopID));
 
     if (!isOwner(nextHopID,nodeId_))                    // if this eNB is the master of next hop vUE aka DOWNLINK
     {
@@ -314,10 +314,12 @@ void GtpUserSimplified::forward(IPv4Datagram* datagram)
     else if (isOwner(nextHopID,nodeId_))        // if this eNB owns this next hop vUE aka UPLINK
     {
         EV << " i.e UPLINK" << endl;
-        L3Address dstAddr_o = datagram->getDestinationAddress();                // true dest address (UE)
-        MacNodeId dstID = binder_->getMacNodeId(dstAddr_o.toIPv4());            // true dest ID (UE)
-        MacNodeId dstMasterID = binder_->getNextHop(dstID);
-        const char* dstName = binder_->getModuleNameByMacNodeId(dstMasterID);
+//        L3Address dstAddr_o = datagram->getDestinationAddress();                // true dest address (UE)
+//        MacNodeId dstID = binder_->getMacNodeId(dstAddr_o.toIPv4());            // true dest ID (UE)
+        MacNodeId dstID = binder_->getNextHop(nextHopID);                         // master ID of the vUE i.e dest eNB of the UL
+//        MacNodeId dstMasterID = binder_->getNextHop(dstID);
+//        const char* dstName = binder_->getModuleNameByMacNodeId(dstMasterID);
+        const char* dstName = binder_->getModuleNameByMacNodeId(dstID);
 
         L3Address srcAddr = L3AddressResolver().resolve(nextHopName);
         L3Address dstAddr = L3AddressResolver().resolve(dstName);

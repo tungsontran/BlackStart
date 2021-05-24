@@ -88,25 +88,3 @@ void vUeApp::handleFromInternal(IPv4Datagram *pkt)
     }
 }
 
-void vUeApp::sendUeList()
-{
-    MacNodeId masterId = getAncestorPar("masterId");
-    // UeList is now a map contains <this ENB node ID, list of UEs node ID connected to it>
-    std::map<MacNodeId, std::map<MacNodeId, bool>> UeList;
-    UeList[masterId] = binder_->getDeployedUes(masterId,DL);
-
-//    EV << "Connected UEs to ENB";
-//    for (auto t : UeList)
-//    {
-//        EV << t.first <<endl;
-//        std::map<MacNodeId, bool> map2 = t.second;
-//        for (auto t2: map2)
-//        {
-//            EV << t2.first << ", ";
-//            const char* moduleName = binder_->getModuleNameByMacNodeId(t2.first);
-//            EV << "module: " << moduleName << ", ";
-//            L3Address ip = L3AddressResolver().resolve(moduleName);
-//            EV << "ip: " << ip << endl;
-//        }
-//    }
-}

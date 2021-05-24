@@ -24,7 +24,6 @@ class vUeApp : public cSimpleModule
         virtual void handleMessage(cMessage *msg);
         virtual void handleFromInternal(IPv4Datagram *pkt);
         virtual void handleFromExternal(cMessage *pkt);
-        virtual void sendUeList();
 };
 
 #endif

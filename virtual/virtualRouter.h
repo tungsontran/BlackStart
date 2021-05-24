@@ -38,6 +38,8 @@ class virtualRouter : public cSimpleModule
     adjMap adjmap_;
     // adjacency matrix, represent topo
     adjMatrix adj_;
+    // weighting scheme
+    routingWeight weight_;
 
   protected:
     MacNodeId nodeId_;
@@ -91,7 +93,7 @@ class virtualRouter : public cSimpleModule
      * Routing methods
      * */
     adjMap createAdjMap();
-    adjMatrix createAdjMatrix(adjMap& adjmap);
+    adjMatrix createAdjMatrix(const adjMap& adjmap, routingWeight weight);
     // return next hop for the shortest path to destination eNB
     MacNodeId computeRoute(MacNodeId dst);
 

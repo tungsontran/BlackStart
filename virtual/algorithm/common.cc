@@ -24,11 +24,19 @@ adjMap getAdjMap(MacNodeId enbCount, MacNodeId vueCount)
     return result;
 }
 
-void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, Cqi wt)
+void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt)
 {
 //    EV << "Addding edge " << u << " " << v << " " << wt << endl;
     adj[u].push_back(std::make_pair(v, wt));
     adj[v].push_back(std::make_pair(u, wt));
+}
+
+routingWeight getRoutingWeight (const char* weight)
+{
+    if (!strcmp(weight,"HOP"))
+        return HOP;
+    else if (!strcmp(weight,"CQI"))
+        return CQI;
 }
 
 void printPath(std::vector<MacNodeId>& parent, MacNodeId j)

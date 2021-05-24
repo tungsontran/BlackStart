@@ -24,6 +24,7 @@ void virtualRouter::initialize(int stage)
     lsa_ = nullptr;
     lsaTimer_ = par("lsaTimer");
     lsaStart_ = par("lsaStart");
+    weight_ = getRoutingWeight(par("weight"));
 
     EV << "Finishing initializing virtual router" << endl;
     lsa_ = new cMessage("linkStateAdvertisement");
@@ -172,7 +173,7 @@ void virtualRouter::handleMessage(cMessage *msg)
             printTable(networkTopoTable_,"Network Topo Table");
             // create graph for routing, map all existing nodes to vertices
             adjmap_ = createAdjMap();
-            adj_ = createAdjMatrix(adjmap_);
+            adj_ = createAdjMatrix(adjmap_, weight_);
             delete(msg);
         }
     }
@@ -223,7 +224,7 @@ adjMap virtualRouter::createAdjMap()
     return adjmap;
 }
 
-adjMatrix virtualRouter::createAdjMatrix(adjMap& adjmap)
+adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingWeight weight)
 {
    // get the number of vertices for the adjacency matrix
    int V = adjmap.size();
@@ -236,7 +237,17 @@ adjMatrix virtualRouter::createAdjMatrix(adjMap& adjmap)
        for (auto jt: it.second)
        {
            MacNodeId v = getAdjIndex(adjmap, jt.first);        // vUE ID
-           Cqi w = 16 - jt.second.second;                      // weight
+           double w;
+           switch (weight){
+           case HOP:
+               w = 1;                                          // weighting by hop count
+               break;
+           case CQI:
+               w = 16 - jt.second.second;                      // weighting by CQI
+               break;
+           default:
+               throw cRuntimeError("createAdjMatrix: invalid weight!");
+           }
            addEdge(adj,u,v,w);
            MacNodeId o = getAdjIndex(adjmap, jt.second.first); // Owner ID
            addEdge(adj,o,v,1);
