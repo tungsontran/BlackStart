@@ -53,18 +53,16 @@ void vUeApp::handleMessage(cMessage *msg)
         scheduleAt(NOW + lsaTimer_, msg);
         return;
     }
-//    else
-//    {
-        if (strstr(msg->getArrivalGate()->getFullName(), "extIO$i") != nullptr)
-        {
-            handleFromExternal(msg);
-        }
-        else if(strcmp(msg->getArrivalGate()->getFullName(),"intIO$i")==0)
-        {
-            IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
-            handleFromInternal(datagram);
-        }
-//    }
+
+    if (strstr(msg->getArrivalGate()->getFullName(), "extIO$i") != nullptr)
+    {
+        handleFromExternal(msg);
+    }
+    else if(strcmp(msg->getArrivalGate()->getFullName(),"intIO$i")==0)
+    {
+        IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
+        handleFromInternal(datagram);
+    }
 }
 
 void vUeApp::handleFromExternal(cMessage *msg)
@@ -76,7 +74,7 @@ void vUeApp::handleFromExternal(cMessage *msg)
     }
     // from ENB of this vUE
     else if (ownerType_ == UE)
-    {   //@TODO
+    {
         EV << "vUeApp::handleMessage - message from ENB, forwarding to stack" << endl;
     }
     send(msg,"intIO$o");
@@ -115,6 +113,7 @@ void vUeApp::handleFromInternal(IPv4Datagram *pkt)
 
 void vUeApp::sendLSA()
 {
+    // LSA on UL
     if (ownerType_ == UE)
     {
         Enter_Method("sendLSA");
@@ -125,7 +124,7 @@ void vUeApp::sendLSA()
         {
             RoutingTableMsg* msg = new RoutingTableMsg();
 
-            MacNodeId srcId = nodeId_;
+            MacNodeId srcId = nodeId_;         // ID of vUE
             msg->setSourceId(srcId);
             L3Address srcAddr = binder_->getL3Address(srcId);
             msg->setSourceAddr(srcAddr.toIPv4());

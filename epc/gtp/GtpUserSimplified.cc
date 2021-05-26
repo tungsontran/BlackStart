@@ -170,7 +170,6 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
                     // continue routing for the next hop
                     forward(datagram_);
                 }
-//                send(datagram_,"pppGate");
             }
         }
     }
@@ -241,8 +240,7 @@ void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
 // or receiving DownlinkAirMessage from a vUE owned by this e2NB
 void GtpUserSimplified::handleFromApp(IPv4Datagram * datagram)
 {
-//    send(datagram,"pppGate");
-    L3Address dstAddr = datagram->getDestinationAddress();         // true dest address (UE)
+    L3Address dstAddr = datagram->getDestinationAddress();          // true dest address (UE)
     MacNodeId dstID = binder_->getMacNodeId(dstAddr.toIPv4());      // true dest ID (UE)
     MacNodeId dstMasterID = binder_->getNextHop(dstID);             // master ID of dest ID (ENB)
 
@@ -314,11 +312,7 @@ void GtpUserSimplified::forward(IPv4Datagram* datagram)
     else if (isOwner(nextHopID,nodeId_))        // if this eNB owns this next hop vUE aka UPLINK
     {
         EV << " i.e UPLINK" << endl;
-//        L3Address dstAddr_o = datagram->getDestinationAddress();                // true dest address (UE)
-//        MacNodeId dstID = binder_->getMacNodeId(dstAddr_o.toIPv4());            // true dest ID (UE)
         MacNodeId dstID = binder_->getNextHop(nextHopID);                         // master ID of the vUE i.e dest eNB of the UL
-//        MacNodeId dstMasterID = binder_->getNextHop(dstID);
-//        const char* dstName = binder_->getModuleNameByMacNodeId(dstMasterID);
         const char* dstName = binder_->getModuleNameByMacNodeId(dstID);
 
         L3Address srcAddr = L3AddressResolver().resolve(nextHopName);

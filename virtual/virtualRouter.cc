@@ -163,36 +163,32 @@ void virtualRouter::handleMessage(cMessage *msg)
         scheduleAt(NOW + lsaTimer_, msg);
         return;
     }
-//    else
-//    {
-//        if (!strcmp(msg->getName(),"LSA_HELLO"))
-//        {
-            RoutingTableMsg* msg_temp = check_and_cast<RoutingTableMsg*>(msg);
-            virtualRoutingTable table_temp = msg_temp->getTable();
-            MacNodeId enbID = getAncestorPar("macNodeId");
-            EV << "Updating Network Topo Table for ENB " << enbID << endl;
-            for (auto it = table_temp.begin(); it != table_temp.end(); ++it)
-            {
-                addTableEntry(networkTopoTable_,*it);
-            }
-            printTable(networkTopoTable_,"Network Topo Table");
-            // create graph for routing, map all existing nodes to vertices
-            adjmap_ = createAdjMap();
-            adj_ = createAdjMatrix(adjmap_, metric_);
-            delete(msg);
-//        }
-//    }
+
+    RoutingTableMsg* msg_temp = check_and_cast<RoutingTableMsg*>(msg);
+    virtualRoutingTable table_temp = msg_temp->getTable();
+    MacNodeId enbID = getAncestorPar("macNodeId");
+    EV << "Updating Network Topo Table for ENB " << enbID << endl;
+    for (auto it = table_temp.begin(); it != table_temp.end(); ++it)
+    {
+        addTableEntry(networkTopoTable_,*it);
+    }
+    printTable(networkTopoTable_,"Network Topo Table");
+    // create graph for routing, map all existing nodes to vertices
+    adjmap_ = createAdjMap();
+    adj_ = createAdjMatrix(adjmap_, metric_);
+    delete(msg);
 }
 
 void virtualRouter::sendLSA()
 {
+    // LSA on DL
     Enter_Method("sendLSA");
     ueEnbCqi::iterator it;
     for (auto it: directNeighbors_.second)
     {
         RoutingTableMsg* msg = new RoutingTableMsg();
 
-        MacNodeId srcId = nodeId_;
+        MacNodeId srcId = nodeId_;  // ID of this e2NB
         msg->setSourceId(srcId);
         L3Address srcAddr = binder_->getL3Address(srcId);
         msg->setSourceAddr(srcAddr.toIPv4());
