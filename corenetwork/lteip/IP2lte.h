@@ -80,9 +80,9 @@ class IP2lte : public cSimpleModule
     void toStackUe(IPv4Datagram* datagram);
 
     void fromIpEnb(IPv4Datagram * datagram);
-    void toIpEnb(cMessage * msg);
-    void toRouter(RoutingTableMsg* msg);
     void toStackEnb(IPv4Datagram* datagram);
+    void toIpEnb(cMessage* msg);
+    void toRouter(RoutingTableMsg* msg);
 
     /**
      * utility: set nodeType_ field

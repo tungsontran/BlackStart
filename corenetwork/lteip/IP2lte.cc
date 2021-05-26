@@ -89,17 +89,27 @@ void IP2lte::handleMessage(cMessage *msg)
 {
     if( nodeType_ == ENODEB )
     {
-        // message from IP Layer: send to stack
         if (msg->getArrivalGate()->isName("upperLayerIn")||msg->getArrivalGate()->isName("fromRouter"))
-        {
+        {   // datagram from upper layer or LSA message from virtual router: send to stack
             if (dynamic_cast<IPv4Datagram *>(msg))
                 fromIpEnb((IPv4Datagram *)msg);
+            // LSA message from upper layer received from DL: send to virtual router
             else if (dynamic_cast<RoutingTableMsg *>(msg))
                 toRouter((RoutingTableMsg *)msg);
         }
-        // message from stack: send to peer
+
         else if(msg->getArrivalGate()->isName("stackLte$i"))
-            toIpEnb(msg);
+        {   // LSA message from stack received from UL: send to virtual router
+            cPacket* pkt = check_and_cast<cPacket*>(msg);
+            if (dynamic_cast<RoutingTableMsg *>(pkt->getEncapsulatedPacket()))
+            {
+                RoutingTableMsg* lsa = check_and_cast<RoutingTableMsg*>(pkt->decapsulate());
+                toRouter(lsa);
+            }
+            else
+            // datagram from stack: send to upper layer
+                toIpEnb(msg);
+        }
         else
         {
             // error: drop message
@@ -110,25 +120,25 @@ void IP2lte::handleMessage(cMessage *msg)
 
     else if( nodeType_ == UE )
     {
-        // message from transport: send to stack
+        // message from upper layer: send to stack
         if (msg->getArrivalGate()->isName("upperLayerIn"))
         {
             IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
-            EV << "LteIp: message from transport: send to stack" << endl;
+            EV << "IP2lte::handleMessage - message from transport: send to stack" << endl;
             fromIpUe(datagram);
         }
         else if(msg->getArrivalGate()->isName("stackLte$i"))
         {
-            // message from stack: send to transport
+            // message from stack: send to upper layer
             IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
-            EV << "LteIp: message from stack: send to transport" << endl;
+            EV << "IP2lte::handleMessage - message from stack: send to upper layer" << endl;
             toIpUe(datagram);
         }
         else
         {
             // error: drop message
             delete msg;
-            EV << "LteIp (UE): Wrong gate " << msg->getArrivalGate()->getName() << endl;
+            EV << "IP2lte::handleMessagw - (UE): Wrong gate " << msg->getArrivalGate()->getName() << endl;
         }
     }
 }
@@ -142,7 +152,7 @@ void IP2lte::setNodeType(std::string s)
 
 void IP2lte::fromIpUe(IPv4Datagram * datagram)
 {
-    EV << "IP2lte::fromIpUe - message from IP layer: send to stack" << endl;
+    EV << "IP2lte::fromIpUe - message from upper layer: send to stack" << endl;
     // Remove control info from IP datagram
     delete(datagram->removeControlInfo());
 
@@ -243,19 +253,13 @@ void IP2lte::toStackUe(IPv4Datagram * datagram)
 
 void IP2lte::toIpUe(IPv4Datagram *datagram)
 {
-    EV << "IP2lte::toIpUe - message from stack: send to IP layer" << endl;
+    EV << "IP2lte::toIpUe - message from stack: send to upper layer" << endl;
     send(datagram,ipGateOut_);
-}
-
-void IP2lte::toRouter(RoutingTableMsg *msg)
-{
-    EV << "IP2lte::toRouter - message from stack: send to IP layer" << endl;
-    send(msg,routerGateOut_);
 }
 
 void IP2lte::fromIpEnb(IPv4Datagram * datagram)
 {
-    EV << "IP2lte::fromIpEnb - message from IP layer: send to stack" << endl;
+    EV << "IP2lte::fromIpEnb - message from upper layer: send to stack" << endl;
     // Remove control info from IP datagram
     delete(datagram->removeControlInfo());
 
@@ -289,18 +293,16 @@ void IP2lte::fromIpEnb(IPv4Datagram * datagram)
     toStackEnb(datagram);
 }
 
-void IP2lte::toIpEnb(cMessage * msg)
+void IP2lte::toIpEnb(cMessage* msg)
 {
-    if (!strcmp(msg->getName(),"LSA_HELLO"))
-    {
-        EV << "IP2lte::toIpEnb - message from stack: send to virtual router" << endl;
-        send(msg,routerGateOut_);
-    }
-    else
-    {
-        EV << "IP2lte::toIpEnb - message from stack: send to IP layer" << endl;
-        send(msg,ipGateOut_);
-    }
+    EV << "IP2lte::toIpEnb - message from stack: send to upper layer" << endl;
+    send(msg,ipGateOut_);
+}
+
+void IP2lte::toRouter(RoutingTableMsg* msg)
+{
+    EV << "IP2lte::toRouter - message from stack: send to virtual router" << endl;
+    send(msg,routerGateOut_);
 }
 
 void IP2lte::toStackEnb(IPv4Datagram* datagram)

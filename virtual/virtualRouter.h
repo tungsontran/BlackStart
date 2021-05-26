@@ -39,7 +39,7 @@ class virtualRouter : public cSimpleModule
     // adjacency matrix, represent topo
     adjMatrix adj_;
     // weighting scheme
-    routingWeight weight_;
+    routingWeight metric_;
 
   protected:
     MacNodeId nodeId_;
@@ -69,6 +69,7 @@ class virtualRouter : public cSimpleModule
     /*
      * Table getter methods
      * */
+    virtualRoutingTableEntry getDirectNeighbors() const;
     virtualRoutingTable getDirectNeighborsTable() const;
     virtualRoutingTable getNetworkTopoTable() const;
     virtualRoutingTable getActualRoutingTable() const;

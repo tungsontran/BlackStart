@@ -24,7 +24,7 @@ void virtualRouter::initialize(int stage)
     lsa_ = nullptr;
     lsaTimer_ = par("lsaTimer");
     lsaStart_ = par("lsaStart");
-    weight_ = getRoutingWeight(par("weight"));
+    metric_ = getRoutingWeight(par("metric"));
 
     EV << "Finishing initializing virtual router" << endl;
     lsa_ = new cMessage("linkStateAdvertisement");
@@ -106,6 +106,11 @@ void virtualRouter::setDirectNeighbors(const ueCqi uecqi)
     addTableEntry(networkTopoTable_, directNeighbors_);
 }
 
+virtualRoutingTableEntry virtualRouter::getDirectNeighbors() const
+{
+    return directNeighbors_;
+}
+
 virtualRoutingTable virtualRouter::getDirectNeighborsTable() const
 {
     return directNeighborsTable_;
@@ -158,10 +163,10 @@ void virtualRouter::handleMessage(cMessage *msg)
         scheduleAt(NOW + lsaTimer_, msg);
         return;
     }
-    else
-    {
-        if (!strcmp(msg->getName(),"LSA_HELLO"))
-        {
+//    else
+//    {
+//        if (!strcmp(msg->getName(),"LSA_HELLO"))
+//        {
             RoutingTableMsg* msg_temp = check_and_cast<RoutingTableMsg*>(msg);
             virtualRoutingTable table_temp = msg_temp->getTable();
             MacNodeId enbID = getAncestorPar("macNodeId");
@@ -173,10 +178,10 @@ void virtualRouter::handleMessage(cMessage *msg)
             printTable(networkTopoTable_,"Network Topo Table");
             // create graph for routing, map all existing nodes to vertices
             adjmap_ = createAdjMap();
-            adj_ = createAdjMatrix(adjmap_, weight_);
+            adj_ = createAdjMatrix(adjmap_, metric_);
             delete(msg);
-        }
-    }
+//        }
+//    }
 }
 
 void virtualRouter::sendLSA()
@@ -196,7 +201,7 @@ void virtualRouter::sendLSA()
         msg->setName("LSA_HELLO");
         msg->setByteLength(40); //@TODO table size?
 
-        MacNodeId dstId = it.first; //@TODO seperate for UL & DL
+        MacNodeId dstId = it.first; // ID of peering vUE
         msg->setDestId(dstId);
         L3Address dstAddr = binder_->getL3Address(dstId);
         msg->setDestAddr(dstAddr.toIPv4());

@@ -7,7 +7,7 @@ void vUeApp::initialize(int stage)
 {
     binder_ = getBinder();
     ownerType_ = selectOwnerType(getAncestorPar("nodeType"));
-    MacNodeId nodeId_ = getAncestorPar("macNodeId");
+    nodeId_ = getAncestorPar("macNodeId");
     if (stage == INITSTAGE_NETWORK_LAYER)
     {
         if (ownerType_ == UE)
@@ -15,7 +15,22 @@ void vUeApp::initialize(int stage)
             // register the pair <id,name> to the binder
             const char* moduleName = getParentModule()->getFullName();
             binder_->registerName(nodeId_, moduleName);
+            vRouter_ = check_and_cast<virtualRouter*>(getSimulation()->getModule(binder_->getOmnetId(getOwnerId(nodeId_)))->getSubmodule("virtualRouter"));
         }
+        else if (ownerType_ == ENODEB)
+        {
+            vRouter_ = check_and_cast<virtualRouter*>(getModuleByPath("^.virtualRouter"));
+        }
+    }
+
+    if (stage == INITSTAGE_LOCAL && ownerType_ == UE)
+    {
+        lsa_ = nullptr;
+        lsaTimer_ = getAncestorPar("lsaTimer");
+        lsaStart_ = getAncestorPar("lsaStart");
+        lsa_ = new cMessage("linkStateAdvertisement");
+        lsa_->setSchedulingPriority(1);
+        scheduleAt(NOW + lsaStart_, lsa_);
     }
 }
 
@@ -31,18 +46,28 @@ LteNodeType vUeApp::selectOwnerType(const char * type)
 
 void vUeApp::handleMessage(cMessage *msg)
 {
-    if (strstr(msg->getArrivalGate()->getFullName(), "extIO$i") != nullptr)
+    if (msg->isSelfMessage())
     {
-        handleFromExternal(msg);
+        sendLSA();
+        EV << "E2NB " << nodeId_ << " is sending Network Topo Table" << endl;
+        scheduleAt(NOW + lsaTimer_, msg);
+        return;
     }
-    else if(strcmp(msg->getArrivalGate()->getFullName(),"intIO$i")==0)
-    {
-        IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
-        handleFromInternal(datagram);
-    }
+//    else
+//    {
+        if (strstr(msg->getArrivalGate()->getFullName(), "extIO$i") != nullptr)
+        {
+            handleFromExternal(msg);
+        }
+        else if(strcmp(msg->getArrivalGate()->getFullName(),"intIO$i")==0)
+        {
+            IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
+            handleFromInternal(datagram);
+        }
+//    }
 }
 
-void vUeApp::handleFromExternal(cMessage *pkt)
+void vUeApp::handleFromExternal(cMessage *msg)
 {
     // from vUE of this ENB
     if (ownerType_ == ENODEB)
@@ -54,7 +79,7 @@ void vUeApp::handleFromExternal(cMessage *pkt)
     {   //@TODO
         EV << "vUeApp::handleMessage - message from ENB, forwarding to stack" << endl;
     }
-    send(pkt,"intIO$o");
+    send(msg,"intIO$o");
 }
 
 void vUeApp::handleFromInternal(IPv4Datagram *pkt)
@@ -88,3 +113,45 @@ void vUeApp::handleFromInternal(IPv4Datagram *pkt)
     }
 }
 
+void vUeApp::sendLSA()
+{
+    if (ownerType_ == UE)
+    {
+        Enter_Method("sendLSA");
+        ueEnbCqi::iterator it;
+        virtualRoutingTableEntry directNeighbors = vRouter_->getDirectNeighbors();
+        virtualRoutingTable networkTopoTable = vRouter_->getNetworkTopoTable();
+        for (auto it: directNeighbors.second)
+        {
+            RoutingTableMsg* msg = new RoutingTableMsg();
+
+            MacNodeId srcId = nodeId_;
+            msg->setSourceId(srcId);
+            L3Address srcAddr = binder_->getL3Address(srcId);
+            msg->setSourceAddr(srcAddr.toIPv4());
+
+            msg->setTable(networkTopoTable);
+            msg->setName("LSA_HELLO");
+            msg->setByteLength(40); //@TODO table size?
+
+            MacNodeId dstId = it.second.first; // ID of peering eNB
+            msg->setDestId(dstId);
+            L3Address dstAddr = binder_->getL3Address(dstId);
+            msg->setDestAddr(dstAddr.toIPv4());
+
+            IPv4Datagram *datagram = new IPv4Datagram();
+            datagram->setSourceAddress(srcAddr);
+            datagram->setDestinationAddress(dstAddr);
+            datagram->setTransportProtocol(IP_PROT_NONE);
+            datagram->setName("LSA_HELLO");
+            datagram->encapsulate(msg);
+
+            send(datagram,"intIO$o");
+        }
+    }
+}
+
+vUeApp::~vUeApp()
+{
+//    cancelAndDelete(msg);
+}

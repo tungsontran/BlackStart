@@ -6,24 +6,37 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "common/LteCommon.h"
 #include "epc/gtp_common.h"
+#include "virtual/virtualRouter.h"
 #include "virtual/packet/RoutingTableMsg.h"
 
 class vUeApp : public cSimpleModule
 {
     LteBinder* binder_;
-    std::map<MacNodeId, std::map<MacNodeId, bool> > UeList;
+    MacNodeId nodeId_;
 
     // specifies the type of the node that contains this filter (it can be ENB or UE)
     LteNodeType ownerType_;
     LteNodeType selectOwnerType(const char * type);
 
+    // for LSA in vUE
+    virtualRouter* vRouter_;
+    // lsa self msg
+    cMessage* lsa_;
+    // Timer to send LSA again
+    double lsaTimer_;
+    // Timer to start sending LSA
+    double lsaStart_;
 
     protected:
         virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void handleFromInternal(IPv4Datagram *pkt);
-        virtual void handleFromExternal(cMessage *pkt);
+        virtual void handleFromExternal(cMessage *msg);
+        void sendLSA();
+
+    public:
+        virtual ~vUeApp();
 };
 
 #endif
