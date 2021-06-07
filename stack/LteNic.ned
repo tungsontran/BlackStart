@@ -21,7 +21,6 @@ import lte.x2.LteX2Manager;
 import lte.stack.compManager.LteCompManager;
 import lte.stack.d2dModeSelection.D2DModeSelection;
 import lte.stack.handoverManager.LteHandoverManager;
-import lte.stack.mac.monitor.LteMacMonitor;
 
 import lte.stack.phy.ChannelModel.LteChannelModelInterface;
 
@@ -104,10 +103,6 @@ module LteNicBase like ILteNic
         channelModel: <LteChannelModelType> like LteChannelModelInterface {
             @display("p=44.8,389.75998");
         }
-        
-//        monitor: LteMacMonitor {
-//		    @display("p=50,100");
-//		}
 
     connections allowunconnected:
         ip2lte.stackLte <--> pdcpRrc.DataPort;                
