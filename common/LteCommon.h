@@ -521,10 +521,12 @@ enum virtualRouterState
 
 // vUE ID, CQI
 typedef std::map<MacNodeId,Cqi> ueCqi;
-// vUE ID, Owner E2NB ID, CQI
-typedef std::map<MacNodeId,std::pair<MacNodeId,Cqi>> ueEnbCqi;
-// Master E2NB ID, vUE ID, Owner E2NB ID, CQI
-typedef std::pair<MacNodeId,ueEnbCqi> virtualRoutingTableEntry;
+// vUE ID, ETX
+typedef std::pair<MacNodeId,double> ueEtx;
+// vUE ID, Owner E2NB ID, Cost/Timestamp [CQI - ETX - ]
+typedef std::map<MacNodeId,std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,2>>> ueEnbCost; //@TODO
+// Master E2NB ID, vUE ID, Owner E2NB ID, Cost
+typedef std::pair<MacNodeId,ueEnbCost> virtualRoutingTableEntry;
 // Store network information of net info pairs
 typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
 // Get ownerId of vUE

@@ -60,7 +60,7 @@ LteMacUe::~LteMacUe()
 
     if (schedulingGrant_!=nullptr)
     {
-        // delete schedulingGrant_;
+        delete schedulingGrant_;
         schedulingGrant_ = nullptr;
     }
 }
@@ -595,7 +595,7 @@ void LteMacUe::handleSelfMessage()
         if(--expirationCounter_ < 0)
         {
             // Periodic grant is expired
-            // delete schedulingGrant_;
+            delete schedulingGrant_;
             schedulingGrant_ = nullptr;
             // if necessary, a RAC request will be sent to obtain a grant
             checkRAC();
@@ -734,8 +734,7 @@ void LteMacUe::handleSelfMessage()
     EV << "--- END UE MAIN LOOP ---" << endl;
 }
 
-void
-LteMacUe::macHandleGrant(cPacket* pkt)
+void LteMacUe::macHandleGrant(cPacket* pkt)
 {
     EV << NOW << " LteMacUe::macHandleGrant - UE [" << nodeId_ << "] - Grant received" << endl;
     // delete old grant
@@ -898,7 +897,7 @@ void LteMacUe::flushHarqBuffers()
     // deleting non-periodic grant
     if (schedulingGrant_ != nullptr && !schedulingGrant_->getPeriodic())
     {
-        // delete schedulingGrant_;
+        delete schedulingGrant_;
         schedulingGrant_=nullptr;
     }
 }

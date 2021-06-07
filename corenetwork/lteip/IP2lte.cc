@@ -105,6 +105,7 @@ void IP2lte::handleMessage(cMessage *msg)
             {
                 RoutingTableMsg* lsa = check_and_cast<RoutingTableMsg*>(pkt->decapsulate());
                 toRouter(lsa);
+                delete pkt;
             }
             else
             // datagram from stack: send to upper layer

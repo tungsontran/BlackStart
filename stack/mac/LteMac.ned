@@ -29,7 +29,8 @@ moduleinterface LteMac {
 // 
 // Base module for the MAC layer of LTE Stack.
 //
-simple LteMacBase like LteMac {
+simple LteMacBase like LteMac 
+{
     parameters:
         @display("i=block/mac");
         string interfaceTableModule;
@@ -54,23 +55,23 @@ simple LteMacBase like LteMac {
         @signal[macDelayDl];
         @statistic[macDelayDl](title="Delay at the MAC layer UL"; unit="s"; source="macDelayDl"; record=mean,vector);
         @signal[macThroughputDl];
-        @statistic[macThroughputDl](title="Throughput at the MAC layer DL"; unit="Bps"; source="macThroughputDl"; record=mean);
+        @statistic[macThroughputDl](title="Throughput at the MAC layer DL"; unit="Bps"; source="macThroughputDl"; record=mean,vector);
         @signal[macDelayUl];
         @statistic[macDelayUl](title="Delay at the MAC layer UL"; unit="s"; source="macDelayUl"; record=mean,vector);
         @signal[macThroughputUl];
-        @statistic[macThroughputUl](title="Throughput at the MAC layer UL"; unit="Bps"; source="macThroughputUl"; record=mean);
+        @statistic[macThroughputUl](title="Throughput at the MAC layer UL"; unit="Bps"; source="macThroughputUl"; record=mean,vector);
         @signal[macCellThroughputUl];
-        @statistic[macCellThroughputUl](title="Cell Throughput at the MAC layer UL"; unit="Bps"; source="macCellThroughputUl"; record=mean);
+        @statistic[macCellThroughputUl](title="Cell Throughput at the MAC layer UL"; unit="Bps"; source="macCellThroughputUl"; record=mean,vector);
         @signal[macCellThroughputDl];
-        @statistic[macCellThroughputDl](title="Cell Throughput at the MAC layer DL"; unit="Bps"; source="macCellThroughputDl"; record=mean);
+        @statistic[macCellThroughputDl](title="Cell Throughput at the MAC layer DL"; unit="Bps"; source="macCellThroughputDl"; record=mean,vector);
         @signal[macCellPacketLossDl];
-        @statistic[macCellPacketLossDl](title="Mac Cell Packet Loss Dl"; unit=""; source="macCellPacketLossDl"; record=mean);
+        @statistic[macCellPacketLossDl](title="Mac Cell Packet Loss Dl"; unit=""; source="macCellPacketLossDl"; record=mean,vector);
         @signal[macCellPacketLossUl];
-        @statistic[macCellPacketLossUl](title="Mac Cell Packet Loss Ul"; unit=""; source="macCellPacketLossUl"; record=mean);
+        @statistic[macCellPacketLossUl](title="Mac Cell Packet Loss Ul"; unit=""; source="macCellPacketLossUl"; record=mean,vector);
         @signal[macPacketLossUl];
-        @statistic[macPacketLossUl](title="Mac Packet Loss Ul"; unit=""; source="macPacketLossUl"; record=mean);
+        @statistic[macPacketLossUl](title="Mac Packet Loss Ul"; unit=""; source="macPacketLossUl"; record=mean,vector);
         @signal[macPacketLossDl];
-        @statistic[macPacketLossDl](title="Mac Packet Loss Dl"; unit=""; source="macPacketLossDl"; record=mean);
+        @statistic[macPacketLossDl](title="Mac Packet Loss Dl"; unit=""; source="macPacketLossDl"; record=mean,vector);
         @signal[macBufferOverFlowDl];
         @statistic[macBufferOverFlowDl](title="Mac buffer overflow as function of time"; unit="Byte/s"; source="macBufferOverFlowDl"; record=mean);
         @signal[macBufferOverFlowUl];
@@ -106,7 +107,7 @@ simple LteMacBase like LteMac {
         @signal[sentPacketToLowerLayer];
         @statistic[sentPacketToLowerLayer](source="sentPacketToLowerLayer"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @signal[measuredItbs];
-        @statistic[measuredItbs](title="TBS index"; unit=""; source="measuredItbs"; record=mean,vector);
+        @statistic[measuredItbs](title="TBS index"; unit=""; source="measuredItbs"; record=mean,vector);	
 
     gates:
         //# 
@@ -121,7 +122,7 @@ simple LteMacBase like LteMac {
         //# 
         
         input PHY_to_MAC;    // PHY to MAC
-        output MAC_to_PHY;    // MAC to PHY
+        output MAC_to_PHY;    // MAC to PHY       
 }
 
 //

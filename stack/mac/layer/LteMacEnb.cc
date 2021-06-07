@@ -938,8 +938,7 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
         }
     }
     ueCqi ueCqi_ = getAmc()->getUeCqi();
-    virtualRouter_->setDirectNeighbors(ueCqi_);
-    virtualRouter_->printDirectNeighbors();
+    virtualRouter_->setDirectNeighborsCQI(ueCqi_);
     delete fb;
 }
 
