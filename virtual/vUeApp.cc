@@ -117,7 +117,7 @@ void vUeApp::sendLSA()
     if (ownerType_ == UE)
     {
         Enter_Method("sendLSA");
-        ueEnbCqi::iterator it;
+        ueEnbCost::iterator it;
         virtualRoutingTableEntry directNeighbors = vRouter_->getDirectNeighbors();
         virtualRoutingTable networkTopoTable = vRouter_->getNetworkTopoTable();
         for (auto it: directNeighbors.second)

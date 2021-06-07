@@ -35,6 +35,7 @@ void virtualRouter::initialize(int stage)
 virtualRouter::~virtualRouter()
 {
     cancelAndDelete(lsa_);
+//    delete lsaMsg_;
 }
 
 void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry)
@@ -42,47 +43,86 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
     if (table.empty())
     {
         EV << "Empty Table!" << endl;
-        EV << "virtualRouter::addTableEntry - Add entry: " << endl;
+        EV << "virtualRouter::addTableEntry - Added entry: " << endl;
         EV << "Master_ID " << entry.first << endl;
-        ueEnbCqi:: iterator jt;
+        ueEnbCost::iterator jt;
         for (auto jt: entry.second)
         {
-            EV << "Owner_ID " << jt.second.first << " - vUE_ID " << jt.first << " - CQI " << jt.second.second << endl;
+            EV << "Owner_ID " << jt.second.first
+               << " - vUE_ID " << jt.first
+               << " - CQI " << jt.second.second[0].first
+               << " (" << jt.second.second[0].second << ")"
+               << " - ETX " << jt.second.second[1].first
+               << " (" << jt.second.second[1].second << ")" << endl;
         }
         table.push_back(entry);
         return;
     }
     else
     {
-        for (auto it = table.begin();it != table.end(); ++it)
+        for (auto table_entry = table.begin();table_entry != table.end(); ++table_entry)    // iterate through table
         {
             // update existing entry
-            if (it->first == entry.first)
+            if (table_entry->first == entry.first)                                          // match master ID of the 2 entries
             {
-                EV << "virtualRouter::addTableEntry - Found entry: "<< endl;
-                EV << "Master_ID " << it->first << endl;
-                ueEnbCqi:: iterator jt;
-                for (auto jt: entry.second)
+                EV << "virtualRouter::addTableEntry - Found entry for Master_ID " << table_entry->first << endl;
+                // iterate through vUE list of this table entry
+                for (auto it = table_entry->second.begin(); it != table_entry->second.end(); ++it)
                 {
-                    EV << "Owner_ID " << jt.second.first << " - vUE_ID " << jt.first << " - CQI " << jt.second.second << endl;
-                }
-                it->second = entry.second;
-                EV << "virtualRouter::addTableEntry - Updated entry: "<< endl;
-                EV << "Master_ID " << it->first << endl;
-                for (auto jt: entry.second)
-                {
-                    EV << "Owner_ID " << jt.second.first << " - vUE_ID " << jt.first << " - CQI " << jt.second.second << endl;
+                    EV << "Owner_ID " << it->second.first
+                       << " - vUE_ID " << it->first
+                       << " - CQI " << it->second.second[0].first
+                       << " (" << it->second.second[0].second << ")"
+                       << " - ETX " << it->second.second[1].first
+                       << " (" << it->second.second[1].second << ")" << endl;
+                    // iterate through vUE list of the adding entry
+                    for (auto jt = entry.second.begin(); jt != entry.second.end(); ++jt)
+                    {
+                        if (it->first == jt->first)    // match vUE ID of the 2 entries
+                        {
+                            EV << "Found sub-entry for vUE_ID: " << it->first << endl;
+                            // if adding entry has newer CQI, update old CQI in the table
+                            if (it->second.second[0].second < jt->second.second[0].second)
+                            {
+                                it->second.second[0].first = jt->second.second[0].first;
+                                it->second.second[0].second = jt->second.second[0].second;
+                            }
+                            // if adding entry has newer ETX, update old ETX in the table
+                            if (it->second.second[1].second < jt->second.second[1].second)
+                            {
+                                it->second.second[1].first = jt->second.second[1].first;
+                                it->second.second[1].second = jt->second.second[1].second;
+                            }
+                        }
+                        else
+                        {
+                            // @TODO if vUE sub-entry doesnt exist, add it
+                        }
+                    }
+                    EV << "Updated entry for Master_ID " << table_entry->first << endl;
+                    EV << "Owner_ID " << it->second.first
+                       << " - vUE_ID " << it->first
+                       << " - CQI " << it->second.second[0].first
+                       << " (" << it->second.second[0].second << ")"
+                       << " - ETX " << it->second.second[1].first
+                       << " (" << it->second.second[1].second << ")" << endl;
                 }
                 return;
             }
-            else if(std::next(it) == table.end())
+            // if adding entry doesn't already exist in table entry, add it to the table
+            else if(std::next(table_entry) == table.end())
             {
-                EV << "virtualRouter::addTableEntry - Add entry: " << endl;
+                EV << "Added entry: " << endl;
                 EV << "Master_ID " << entry.first << endl;
-                ueEnbCqi:: iterator jt;
+                ueEnbCost:: iterator jt;
                 for (auto jt: entry.second)
                 {
-                    EV << "Owner_ID " << jt.second.first << " - vUE_ID " << jt.first << " - CQI " << jt.second.second << endl;
+                    EV << "Owner_ID " << jt.second.first
+                                   << " - vUE_ID " << jt.first
+                                   << " - CQI " << jt.second.second[0].first
+                                   << " (" << jt.second.second[0].second << ")"
+                                   << " - ETX " << jt.second.second[1].first
+                                   << " (" << jt.second.second[1].second << ")" << endl;
                 }
                 table.push_back(entry);
                 return;
@@ -91,42 +131,46 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
     }
 }
 
-void virtualRouter::setDirectNeighbors(const ueCqi uecqi)
+void virtualRouter::setDirectNeighborsCQI(const ueCqi uecqi)
 {
-    directNeighbors_.first = nodeId_;
-    ueEnbCqi ueenbcqi;
+    directNeighbors_.first = nodeId_;                                         // entry header (master ID)
     ueCqi::iterator it;
     for (auto it: uecqi)
     {
-        ueenbcqi[it.first].first = getOwnerId(it.first);
-        ueenbcqi[it.first].second = it.second;
+        directNeighbors_.second[it.first].first = getOwnerId(it.first);       // owner ID corresponding to vUE ID
+        directNeighbors_.second[it.first].second[0].first = it.second;        // CQI
+        directNeighbors_.second[it.first].second[0].second = NOW;             // CQI write time stamp
     }
-    directNeighbors_.second = ueenbcqi;
-    addTableEntry(directNeighborsTable_, directNeighbors_);
+//    addTableEntry(directNeighborsTable_, directNeighbors_);
     addTableEntry(networkTopoTable_, directNeighbors_);
+    printDirectNeighbors();
 }
 
-virtualRoutingTableEntry virtualRouter::getDirectNeighbors() const
+void virtualRouter::setDirectNeighborsETX(const ueEtx ueetx)
+{
+    directNeighbors_.second[ueetx.first].second[1].first = ueetx.second;      // ETX
+    directNeighbors_.second[ueetx.first].second[1].second = NOW;              // ETX write time stamp
+//    addTableEntry(directNeighborsTable_, directNeighbors_);
+    addTableEntry(networkTopoTable_, directNeighbors_);
+    printDirectNeighbors();
+}
+
+virtualRoutingTableEntry virtualRouter::getDirectNeighbors()
 {
     return directNeighbors_;
 }
 
-virtualRoutingTable virtualRouter::getDirectNeighborsTable() const
+virtualRoutingTable virtualRouter::getDirectNeighborsTable()
 {
     return directNeighborsTable_;
 }
 
-virtualRoutingTable virtualRouter::getNetworkTopoTable() const
+virtualRoutingTable virtualRouter::getNetworkTopoTable()
 {
     return networkTopoTable_;
 }
 
-virtualRoutingTable virtualRouter::getActualRoutingTable() const
-{
-    return actualRoutingTable_;
-}
-
-void virtualRouter::printDirectNeighbors() const
+void virtualRouter::printDirectNeighbors()
 {
     EV << "virtualRouter::printDirectNeighbors(): This ENB " << directNeighbors_.first << " is connecting to the following vUEs:" << endl;
     ueCqi::iterator it;
@@ -134,7 +178,10 @@ void virtualRouter::printDirectNeighbors() const
     {
         EV << "virtualRouter::printDirectNeighbors(): vUE " << it.first
                                          << ", Owner E2NB " << it.second.first
-                                         << ", CQI: " << it.second.second << endl;
+                                         << ", CQI: " << it.second.second[0].first
+                                         << " (" << it.second.second[0].second << ")"
+                                         << ", ETX: " << it.second.second[1].first
+                                         << " (" << it.second.second[1].second << ")" << endl;
     }
 }
 
@@ -145,11 +192,15 @@ void virtualRouter::printTable(const virtualRoutingTable table, const char* name
     for (auto tableEntry: table)
     {
         EV << "Master ENB " << tableEntry.first << endl;
-        ueEnbCqi::iterator ueenbcqi;
-        for (auto ueenbcqi: tableEntry.second)
+        for (auto it: tableEntry.second)
         {
-            EV << "Owner ENB " << ueenbcqi.second.first << ", vUE " << ueenbcqi.first << ", CQI = " << ueenbcqi.second.second << endl;
-        } //@TODO direct master
+            EV << "Owner ENB " << it.second.first
+               << ", vUE " << it.first
+               << ", CQI = " << it.second.second[0].first
+               << " (" << it.second.second[0].second << ")"
+               << ", ETX = " << it.second.second[1].first
+               << " (" << it.second.second[0].second << ")" << endl;
+        }
     }
     EV << "virtualRouter::printTable(): ***** End Print Table *****" << endl;
 }
@@ -183,35 +234,33 @@ void virtualRouter::sendLSA()
 {
     // LSA on DL
     Enter_Method("sendLSA");
-    ueEnbCqi::iterator it;
+    ueEnbCost::iterator it;
     for (auto it: directNeighbors_.second)
     {
-        RoutingTableMsg* msg = new RoutingTableMsg();
+        RoutingTableMsg* lsaMsg_ = new RoutingTableMsg();
 
         MacNodeId srcId = nodeId_;  // ID of this e2NB
-        msg->setSourceId(srcId);
+        lsaMsg_->setSourceId(srcId);
         L3Address srcAddr = binder_->getL3Address(srcId);
-        msg->setSourceAddr(srcAddr.toIPv4());
+        lsaMsg_->setSourceAddr(srcAddr.toIPv4());
 
-        msg->setTable(networkTopoTable_);
-        msg->setName("LSA_HELLO");
-        msg->setByteLength(40); //@TODO table size?
+        lsaMsg_->setTable(networkTopoTable_);
+        lsaMsg_->setName("LSA_HELLO");
+        lsaMsg_->setByteLength(40); //@TODO table size?
 
         MacNodeId dstId = it.first; // ID of peering vUE
-        msg->setDestId(dstId);
+        lsaMsg_->setDestId(dstId);
         L3Address dstAddr = binder_->getL3Address(dstId);
-        msg->setDestAddr(dstAddr.toIPv4());
+        lsaMsg_->setDestAddr(dstAddr.toIPv4());
 
         IPv4Datagram *datagram = new IPv4Datagram();
         datagram->setSourceAddress(srcAddr);
         datagram->setDestinationAddress(dstAddr);
         datagram->setTransportProtocol(IP_PROT_NONE);
         datagram->setName("LSA_HELLO");
-        datagram->encapsulate(msg);
+        datagram->encapsulate(lsaMsg_);
 
         send(datagram,"ipOut");
-
-//        emit(sendLsaHello,datagram);
     }
 }
 
@@ -244,7 +293,8 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingWeight wei
                w = 1;                                          // weighting by hop count
                break;
            case CQI:
-               w = 16 - jt.second.second;                      // weighting by CQI
+               w = 16 - jt.second.second[0].first;                      // weighting by CQI
+//               w = 1/jt.second.second[0];                      // weighting by CQI
                break;
            default:
                throw cRuntimeError("createAdjMatrix: invalid weight!");

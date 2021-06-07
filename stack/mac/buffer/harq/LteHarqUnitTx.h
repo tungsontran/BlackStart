@@ -16,6 +16,8 @@
 #include "common/LteControlInfo.h"
 #include "common/LteCommon.h"
 #include "stack/mac/layer/LteMacBase.h"
+#include "stack/mac/layer/LteMacEnb.h"
+#include "virtual/virtualRouter.h"
 
 class LteMacBase;
 
@@ -87,6 +89,12 @@ class LteHarqUnitTx
     simsignal_t harqErrorRateD2D_3_;
     simsignal_t harqErrorRateD2D_4_;
 
+    // calculating ETX metric
+    double rtxCnt_;
+    double txCnt_;
+
+    // reference to virtual router
+    virtualRouter* virtualRouter_;
   public:
     /**
      * Constructor.
@@ -202,6 +210,11 @@ class LteHarqUnitTx
 
     virtual ~LteHarqUnitTx();
 
+    // caculate the expected transmission count based on successfully & unsuccessfully
+    // transmission, through harq ACK & NACK. The result is writen directly to the
+    // virtual router. If macOwner is ENB, write as etxDL to its virtual router,
+    // else if macOwner is UE, write as etxUL to its owner ENB's virtual router
+    void calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt);
   protected:
 
     virtual void resetUnit();

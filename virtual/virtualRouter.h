@@ -34,11 +34,13 @@ class virtualRouter : public cSimpleModule
     double lsaTimer_;
     // Timer to start sending LSA
     double lsaStart_;
+    // Link State message
+//    RoutingTableMsg* lsaMsg_;
     // adjacency map, maps nodeID to vertexID
     adjMap adjmap_;
     // adjacency matrix, represent topo
     adjMatrix adj_;
-    // weighting scheme
+    // weighting metric
     routingWeight metric_;
 
   protected:
@@ -49,7 +51,6 @@ class virtualRouter : public cSimpleModule
 
     virtualRoutingTable directNeighborsTable_;
     virtualRoutingTable networkTopoTable_;
-    virtualRoutingTable actualRoutingTable_;
 
     simsignal_t sendLsaHello;
 
@@ -63,22 +64,22 @@ class virtualRouter : public cSimpleModule
      * */
     // Add new entry to a table
     void addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry);
-    // Set information of direct neighbor nodes to the tables
-    void setDirectNeighbors(const ueCqi uecqi);
-
+    // Set CQI of direct neighbor nodes to the tables
+    void setDirectNeighborsCQI(const ueCqi uecqi);
+    // Set ETX of direct neighbor nodes to the tables
+    void setDirectNeighborsETX(const ueEtx ueetx);
     /*
      * Table getter methods
      * */
-    virtualRoutingTableEntry getDirectNeighbors() const;
-    virtualRoutingTable getDirectNeighborsTable() const;
-    virtualRoutingTable getNetworkTopoTable() const;
-    virtualRoutingTable getActualRoutingTable() const;
+    virtualRoutingTableEntry getDirectNeighbors();
+    virtualRoutingTable getDirectNeighborsTable();
+    virtualRoutingTable getNetworkTopoTable();
 
     /*
      * Table printer methods
      * */
     // print neighbors information
-    void printDirectNeighbors() const;
+    void printDirectNeighbors();
     // print a table
     void printTable(const virtualRoutingTable table, const char* name);
 
