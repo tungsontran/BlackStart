@@ -31,7 +31,7 @@ void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt)
     adj[v].push_back(std::make_pair(u, wt));
 }
 
-routingWeight getRoutingWeight (const char* weight)
+routingMetric getRoutingWeight (const char* weight)
 {
     if (!strcmp(weight,"HOP"))
         return HOP;
@@ -48,7 +48,7 @@ void printPath(std::vector<MacNodeId>& parent, MacNodeId j)
     EV << j << " ";
 }
 
-void printSolution(std::vector<int> dist, int V, std::vector<MacNodeId> parent, MacNodeId src)
+void printSolution(std::vector<double> dist, int V, std::vector<MacNodeId> parent, MacNodeId src)
 {
     EV << "Vertex\t Distance\t Path" << endl;
     for (int i = 0; i < V; i++)

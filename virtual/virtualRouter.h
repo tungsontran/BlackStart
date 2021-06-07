@@ -41,15 +41,13 @@ class virtualRouter : public cSimpleModule
     // adjacency matrix, represent topo
     adjMatrix adj_;
     // weighting metric
-    routingWeight metric_;
+    routingMetric metric_;
 
   protected:
     MacNodeId nodeId_;
     virtualRouterState* state_;
 
     virtualRoutingTableEntry directNeighbors_;
-
-    virtualRoutingTable directNeighborsTable_;
     virtualRoutingTable networkTopoTable_;
 
     simsignal_t sendLsaHello;
@@ -72,7 +70,6 @@ class virtualRouter : public cSimpleModule
      * Table getter methods
      * */
     virtualRoutingTableEntry getDirectNeighbors();
-    virtualRoutingTable getDirectNeighborsTable();
     virtualRoutingTable getNetworkTopoTable();
 
     /*
@@ -95,7 +92,7 @@ class virtualRouter : public cSimpleModule
      * Routing methods
      * */
     adjMap createAdjMap();
-    adjMatrix createAdjMatrix(const adjMap& adjmap, routingWeight weight);
+    adjMatrix createAdjMatrix(const adjMap& adjmap, routingMetric weight);
     // return next hop for the shortest path to destination eNB
     MacNodeId computeRoute(MacNodeId dst);
 
