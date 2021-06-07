@@ -19,7 +19,7 @@ using namespace omnetpp;
 
 class virtualRouter;
 
-typedef std::pair<double,MacNodeId> weight;
+typedef std::pair<MacNodeId,double> weight;
 typedef std::vector<MacNodeId> adjMap;
 typedef std::vector<std::vector<weight>> adjMatrix;
 
@@ -32,13 +32,13 @@ void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt);
 // Function to print shortest path from source to j using parent array
 void printPath(std::vector<MacNodeId>& parent, MacNodeId j);
 // A utility function to print the constructed distance array
-void printSolution(std::vector<int> dist, int V, std::vector<MacNodeId> parent, MacNodeId src);
+void printSolution(std::vector<double> dist, int V, std::vector<MacNodeId> parent, MacNodeId src);
 // Get next hop from the shortest route
 MacNodeId getNextHop(std::vector<MacNodeId> parent, MacNodeId src, MacNodeId dst);
 
-enum routingWeight {
+enum routingMetric {
     HOP, CQI
 };
 
-routingWeight getRoutingWeight (const char* weight);
+routingMetric getRoutingWeight (const char* weight);
 #endif /* VIRTUAL_ALGORITHM_COMMON_H_ */

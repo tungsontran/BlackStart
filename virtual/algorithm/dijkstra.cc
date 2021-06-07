@@ -45,7 +45,7 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
     std::priority_queue<weight, std::vector<weight> , std::greater<weight>> pq;
 
     // Create a vector for distances and initialize all distances as infinite
-    std::vector<int> dist(V, INF);
+    std::vector<double> dist(V, INF);
     dist[src] = 0;
 
     // sptSet[i] will true if vertex i is included in shortest
@@ -65,6 +65,7 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
         // The first vertex in pair is the minimum distance vertex, extract it from priority queue.
         // vertex label is stored in second of pair (it has to be done this way to keep the vertices
         // sorted distance (distance must be first item in pair)
+        // (@Tung: actually this is not true. I reversed the order and it worked fine???)
         int u = pq.top().second;
 
         pq.pop();
@@ -74,7 +75,7 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
         {
             // Get vertex label and weight of current adjacent of u.
             int v = x.first;
-            int weight = x.second;
+            double weight = x.second;
             // If there is shorted path to v through u.
             if (!sptSet[v] && weight && dist[v] > dist[u] + weight)
             {

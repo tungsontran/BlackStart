@@ -134,14 +134,12 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
 void virtualRouter::setDirectNeighborsCQI(const ueCqi uecqi)
 {
     directNeighbors_.first = nodeId_;                                         // entry header (master ID)
-    ueCqi::iterator it;
     for (auto it: uecqi)
     {
         directNeighbors_.second[it.first].first = getOwnerId(it.first);       // owner ID corresponding to vUE ID
         directNeighbors_.second[it.first].second[0].first = it.second;        // CQI
         directNeighbors_.second[it.first].second[0].second = NOW;             // CQI write time stamp
     }
-//    addTableEntry(directNeighborsTable_, directNeighbors_);
     addTableEntry(networkTopoTable_, directNeighbors_);
     printDirectNeighbors();
 }
@@ -150,7 +148,6 @@ void virtualRouter::setDirectNeighborsETX(const ueEtx ueetx)
 {
     directNeighbors_.second[ueetx.first].second[1].first = ueetx.second;      // ETX
     directNeighbors_.second[ueetx.first].second[1].second = NOW;              // ETX write time stamp
-//    addTableEntry(directNeighborsTable_, directNeighbors_);
     addTableEntry(networkTopoTable_, directNeighbors_);
     printDirectNeighbors();
 }
@@ -158,11 +155,6 @@ void virtualRouter::setDirectNeighborsETX(const ueEtx ueetx)
 virtualRoutingTableEntry virtualRouter::getDirectNeighbors()
 {
     return directNeighbors_;
-}
-
-virtualRoutingTable virtualRouter::getDirectNeighborsTable()
-{
-    return directNeighborsTable_;
 }
 
 virtualRoutingTable virtualRouter::getNetworkTopoTable()
@@ -274,7 +266,7 @@ adjMap virtualRouter::createAdjMap()
     return adjmap;
 }
 
-adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingWeight weight)
+adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric metric)
 {
    // get the number of vertices for the adjacency matrix
    int V = adjmap.size();
@@ -288,13 +280,13 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingWeight wei
        {
            MacNodeId v = getAdjIndex(adjmap, jt.first);        // vUE ID
            double w;
-           switch (weight){
+           switch (metric){
            case HOP:
                w = 1;                                          // weighting by hop count
                break;
            case CQI:
-               w = 16 - jt.second.second[0].first;                      // weighting by CQI
-//               w = 1/jt.second.second[0];                      // weighting by CQI
+//               w = 16 - jt.second.second[0].first;                      // weighting by CQI
+               w = 1/jt.second.second[0].first;                // weighting by CQI
                break;
            default:
                throw cRuntimeError("createAdjMatrix: invalid weight!");
