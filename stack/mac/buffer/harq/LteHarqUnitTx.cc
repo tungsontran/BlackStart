@@ -9,7 +9,6 @@
 
 #include "stack/mac/buffer/harq/LteHarqUnitTx.h"
 #include "stack/mac/layer/LteMacEnb.h"
-#include "stack/mac/monitor/LteMacMonitorHarq.h"
 #include <omnetpp.h>
 
 LteHarqUnitTx::LteHarqUnitTx(unsigned char acid, Codeword cw,

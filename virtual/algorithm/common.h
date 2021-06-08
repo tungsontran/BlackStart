@@ -37,8 +37,8 @@ void printSolution(std::vector<double> dist, int V, std::vector<MacNodeId> paren
 MacNodeId getNextHop(std::vector<MacNodeId> parent, MacNodeId src, MacNodeId dst);
 
 enum routingMetric {
-    HOP, CQI
+    HOP, CQI, ETX
 };
 
-routingMetric getRoutingWeight (const char* weight);
+routingMetric getRoutingMetric (const char* weight);
 #endif /* VIRTUAL_ALGORITHM_COMMON_H_ */

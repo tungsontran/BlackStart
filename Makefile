@@ -91,8 +91,6 @@ OBJS = \
     $O/stack/mac/layer/LteMacRelayUe.o \
     $O/stack/mac/layer/LteMacUe.o \
     $O/stack/mac/layer/LteMacUeD2D.o \
-    $O/stack/mac/monitor/LteMacMonitor.o \
-    $O/stack/mac/monitor/LteMacMonitorHarq.o \
     $O/stack/mac/scheduler/LcgScheduler.o \
     $O/stack/mac/scheduler/LteScheduler.o \
     $O/stack/mac/scheduler/LteSchedulerEnb.o \

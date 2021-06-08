@@ -31,12 +31,13 @@ void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt)
     adj[v].push_back(std::make_pair(u, wt));
 }
 
-routingMetric getRoutingWeight (const char* weight)
+routingMetric getRoutingMetric (const char* metric)
 {
-    if (!strcmp(weight,"HOP"))
-        return HOP;
-    else if (!strcmp(weight,"CQI"))
+    if (!strcmp(metric,"CQI"))
         return CQI;
+    else if (!strcmp(metric,"ETX"))
+        return ETX;
+    return HOP;
 }
 
 void printPath(std::vector<MacNodeId>& parent, MacNodeId j)

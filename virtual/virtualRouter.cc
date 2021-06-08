@@ -24,7 +24,7 @@ void virtualRouter::initialize(int stage)
     lsa_ = nullptr;
     lsaTimer_ = par("lsaTimer");
     lsaStart_ = par("lsaStart");
-    metric_ = getRoutingWeight(par("metric"));
+    metric_ = getRoutingMetric(par("metric"));
 
     EV << "Finishing initializing virtual router" << endl;
     lsa_ = new cMessage("linkStateAdvertisement");
@@ -80,7 +80,7 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                     {
                         if (it->first == jt->first)    // match vUE ID of the 2 entries
                         {
-                            EV << "Found sub-entry for vUE_ID: " << it->first << endl;
+                            EV << "Found sub-entry for vUE " << it->first << endl;
                             // if adding entry has newer CQI, update old CQI in the table
                             if (it->second.second[0].second < jt->second.second[0].second)
                             {
@@ -94,9 +94,14 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                                 it->second.second[1].second = jt->second.second[1].second;
                             }
                         }
-                        else
-                        {
-                            // @TODO if vUE sub-entry doesnt exist, add it
+                        else if (std::next(it) == table_entry->second.end())
+                        {   // @TODO: extremely inelegant lol
+                            EV << "Sub-entry for vUE " << it->first << " not found, adding it to the table" << endl;
+                            std::pair<double,simtime_t> cqi_time = std::make_pair(jt->second.second[0].first,jt->second.second[0].second);
+                            std::pair<double,simtime_t> etx_time = std::make_pair(jt->second.second[1].first,jt->second.second[1].second);
+                            std::array<std::pair<double,simtime_t>,2> costArray= {cqi_time,etx_time};
+                            std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,2>> ownerCost = std::make_pair(jt->second.first,costArray);
+                            table_entry->second.insert(std::make_pair(jt->first,ownerCost));
                         }
                     }
                     EV << "Updated entry for Master_ID " << table_entry->first << endl;
@@ -279,21 +284,27 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
        for (auto jt: it.second)
        {
            MacNodeId v = getAdjIndex(adjmap, jt.first);        // vUE ID
-           double w;
+           double w;                                           // edge weight
+           double w_min;                                       // minimum possible edge weight
            switch (metric){
            case HOP:
                w = 1;                                          // weighting by hop count
+               w_min = 1;
                break;
            case CQI:
-//               w = 16 - jt.second.second[0].first;                      // weighting by CQI
-               w = 1/jt.second.second[0].first;                // weighting by CQI
+               w = 1/jt.second.second[0].first;                // weighting by CQI, inverse to minimize
+               w_min = 0.0666667;                              // max CQI is 15 so min weight is 1/15
+               break;
+           case ETX:
+               w = jt.second.second[1].first;                  // weighting by ETX
+               w_min = 1;
                break;
            default:
                throw cRuntimeError("createAdjMatrix: invalid weight!");
            }
            addEdge(adj,u,v,w);
            MacNodeId o = getAdjIndex(adjmap, jt.second.first); // Owner ID
-           addEdge(adj,o,v,1);
+           addEdge(adj,o,v,w_min);
        }
    }
    EV << "***** Adjacency Matrix *****" << endl;
