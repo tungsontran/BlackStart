@@ -22,12 +22,22 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "virtual/algorithm/dijkstra.h"
+#include "stack/mac/layer/LteMacEnb.h"
+#include "stack/mac/amc/LteAmc.h"
+#include "corenetwork/lteCellInfo/LteCellInfo.h"
 
 using namespace omnetpp;
 
 class virtualRouter : public cSimpleModule
 {
+    // Binder reference
     LteBinder* binder_;
+    // Mac reference
+    LteMacEnb* mac_;
+    // AMC reference
+    LteAmc* amc_;
+    // Cell Info
+    LteCellInfo* cellInfo_;
     // Link State self message
     cMessage* lsa_;
     // Timer to send LSA again

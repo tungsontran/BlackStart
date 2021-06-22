@@ -50,9 +50,6 @@ LteHarqUnitTx::LteHarqUnitTx(unsigned char acid, Codeword cw,
             harqErrorRate_2_ = macOwner_->registerSignal("harqErrorRate_2nd_Ul");
             harqErrorRate_3_ = macOwner_->registerSignal("harqErrorRate_3rd_Ul");
             harqErrorRate_4_ = macOwner_->registerSignal("harqErrorRate_4th_Ul");
-//            MacNodeId ownerId = getOwnerId(macOwner_->getMacNodeId);
-//            LteMacEnb* macOwnerEnb = check_and_cast<LteMacEnb*>(getMacByMacNodeId(ownerId));
-//            virtualRouter_ = macOwnerEnb->getVirtualRouter();
             virtualRouter_ = nullptr;
         }
     }
@@ -209,12 +206,15 @@ bool LteHarqUnitTx::pduFeedback(HarqAcknowledgment a)
     {
         MacNodeId ueId = dstMac_->getMacNodeId();
         if (getNodeSubTypeById(ueId) == VUE)
-            calculateEtx(ueId,txCnt_,rtxCnt_);
+        {
+            ueEtx ueetx = calculateEtx(ueId,txCnt_,rtxCnt_);
+            virtualRouter_->setDirectNeighborsETX(ueetx);
+        }
     }
     return reset;
 }
 
-void LteHarqUnitTx::calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt)
+ueEtx LteHarqUnitTx::calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt)
 {
     double etx = 1 + rtxCnt/txCnt;
     EV << "LteHarqUnitTx::calculateEtx - Calculating ETX of link "<< getBinder()->getNextHop(ueId)
@@ -222,7 +222,7 @@ void LteHarqUnitTx::calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt)
     ueEtx ueetx;
     ueetx.first = ueId;
     ueetx.second = etx;
-    virtualRouter_->setDirectNeighborsETX(ueetx);
+    return ueetx;
 }
 
 bool LteHarqUnitTx::isEmpty()

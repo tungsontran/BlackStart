@@ -211,10 +211,8 @@ class LteHarqUnitTx
     virtual ~LteHarqUnitTx();
 
     // caculate the expected transmission count based on successfully & unsuccessfully
-    // transmission, through harq ACK & NACK. The result is writen directly to the
-    // virtual router. If macOwner is ENB, write as etxDL to its virtual router,
-    // else if macOwner is UE, write as etxUL to its owner ENB's virtual router
-    void calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt);
+    // transmission, through harq ACK & NACK. The result is writen directly to the virtual router.
+    ueEtx calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt);
   protected:
 
     virtual void resetUnit();

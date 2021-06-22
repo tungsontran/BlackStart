@@ -21,6 +21,9 @@ void virtualRouter::initialize(int stage)
 {
     nodeId_ = getAncestorPar("macNodeId");
     binder_ = getBinder();
+    mac_ = check_and_cast<LteMacEnb*>(getMacByMacNodeId(nodeId_));
+    cellInfo_ = mac_->getCellInfo();
+
     lsa_ = nullptr;
     lsaTimer_ = par("lsaTimer");
     lsaStart_ = par("lsaStart");
@@ -30,6 +33,11 @@ void virtualRouter::initialize(int stage)
     lsa_ = new cMessage("linkStateAdvertisement");
     lsa_->setSchedulingPriority(1);
     scheduleAt(NOW + lsaStart_, lsa_);
+
+    if (stage == inet::INITSTAGE_NETWORK_LAYER)
+    {
+        amc_ = mac_->getAmc();
+    }
 }
 
 virtualRouter::~virtualRouter()
@@ -119,7 +127,6 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
             {
                 EV << "Added entry: " << endl;
                 EV << "Master_ID " << entry.first << endl;
-                ueEnbCost:: iterator jt;
                 for (auto jt: entry.second)
                 {
                     EV << "Owner_ID " << jt.second.first
@@ -284,27 +291,58 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
        for (auto jt: it.second)
        {
            MacNodeId v = getAdjIndex(adjmap, jt.first);        // vUE ID
-           double w;                                           // edge weight
+           MacNodeId o = getAdjIndex(adjmap, jt.second.first); // Owner ID
+           double w;                                           // symmetric edge weight
            double w_min;                                       // minimum possible edge weight
+           double wU,wD;                                       // asymmetric edge weight
            switch (metric){
            case HOP:
+           {
                w = 1;                                          // weighting by hop count
                w_min = 1;
+               addEdgeSymmetric(adj,u,v,w);
                break;
+           }
            case CQI:
+           {
                w = 1/jt.second.second[0].first;                // weighting by CQI, inverse to minimize
                w_min = 0.0666667;                              // max CQI is 15 so min weight is 1/15
+               addEdgeSymmetric(adj,u,v,w);
                break;
+           }
            case ETX:
+           {
                w = jt.second.second[1].first;                  // weighting by ETX
                w_min = 1;
+               addEdgeSymmetric(adj,u,v,w);
                break;
+           }
+           case ETT:
+           {
+               double etx = jt.second.second[1].first;
+               Cqi cqi = jt.second.second[0].first;
+               // number of antenna layers.
+               unsigned int layers = 1;                        // @TODO: support MIMO?
+               // get number of resource blocks for each channel
+               int numRbUl = cellInfo_->getNumRbUl();
+               int numRbDl = cellInfo_->getNumRbDl();
+               // this is only the transmission rate per 1 millisecond (1 TTI),
+               // it should be x1000 but would be unnecessary for comparison
+               double transmissionRateUL = mac_->getAmc()->readTbsVect(cqi,layers,UL)[numRbUl];
+               double transmissionRateDL = mac_->getAmc()->readTbsVect(cqi,layers,DL)[numRbDl];
+               // ETT of each channel = ETX * packet size / transmission rate
+               // Packet size is omitted because it's unnecessary for comparison
+               wU = etx/transmissionRateUL;
+               wD = etx/transmissionRateDL;
+               // ETT is relatively small so a small number should be sufficient as min weight
+               w_min = 0.00001;
+               addEdgeAsymmetric(adj,u,v,wU,wD);
+               break;
+           }
            default:
                throw cRuntimeError("createAdjMatrix: invalid weight!");
            }
-           addEdge(adj,u,v,w);
-           MacNodeId o = getAdjIndex(adjmap, jt.second.first); // Owner ID
-           addEdge(adj,o,v,w_min);
+           addEdgeSymmetric(adj,o,v,w_min);
        }
    }
    EV << "***** Adjacency Matrix *****" << endl;

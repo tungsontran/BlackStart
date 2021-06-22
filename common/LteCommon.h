@@ -518,7 +518,7 @@ enum virtualRouterState
 {
     DOWN, INIT, TWO_WAY, EXSTART, EXCHANGE, LOADING, FULL
 };
-
+//@TODO: I wish I knew about std::tupple before implementing these horrible types... Also considering using struct for readability
 // vUE ID, CQI
 typedef std::map<MacNodeId,Cqi> ueCqi;
 // vUE ID, ETX
