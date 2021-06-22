@@ -751,8 +751,8 @@ unsigned int LteAmc::computeBitsOnNRbs(MacNodeId id, Band b, unsigned int blocks
     }
 
             // DEBUG
-    EV << NOW << " LteAmc::computeBitsOnNRbs Resource Blocks: " << blocks << "\n";
-    EV << NOW << " LteAmc::computeBitsOnNRbs Available space: " << bits << "\n";
+    EV << NOW << " LteAmc::computeBitsOnNRbs Available Blocks: " << blocks << "\n";
+    EV << NOW << " LteAmc::computeBitsOnNRbs Available Bits: " << bits << "\n";
 
     return bits;
 }
@@ -795,7 +795,7 @@ unsigned int LteAmc::computeBitsOnNRbs(MacNodeId id, Band b, Codeword cw, unsign
 
     // DEBUG
     EV << NOW << " LteAmc::computeBitsOnNRbs Resource Blocks: " << blocks << "\n";
-    EV << NOW << " LteAmc::computeBitsOnNRbs Available space: " << tbsVect[blocks-1] << "\n";
+    EV << NOW << " LteAmc::computeBitsOnNRbs Available Bits: " << tbsVect[blocks-1] << "\n";
 
     return tbsVect[blocks - 1];
 }
@@ -808,7 +808,7 @@ unsigned int LteAmc::computeBytesOnNRbs(MacNodeId id, Band b, unsigned int block
     unsigned int bytes = bits/8;
 
     // DEBUG
-    EV << NOW << " LteAmc::computeBytesOnNRbs Available space: " << bytes << "\n";
+    EV << NOW << " LteAmc::computeBytesOnNRbs Available Bytes: " << bytes << "\n";
 
     return bytes;
 }
@@ -821,7 +821,7 @@ unsigned int LteAmc::computeBytesOnNRbs(MacNodeId id, Band b, Codeword cw, unsig
     unsigned int bytes = bits/8;
 
     // DEBUG
-    EV << NOW << " LteAmc::computeBytesOnNRbs Available space: " << bytes << "\n";
+    EV << NOW << " LteAmc::computeBytesOnNRbs Available Bytes: " << bytes << "\n";
 
     return bytes;
 }
@@ -835,7 +835,7 @@ unsigned int LteAmc::computeBytesOnNRbs_MB(MacNodeId id, Band b, unsigned int bl
 
     // DEBUG
 
-    EV << NOW << " LteAmc::computeBytesOnNRbs_MB Available space: " << bytes << "\n";
+    EV << NOW << " LteAmc::computeBytesOnNRbs_MB Available Bytes: " << bytes << "\n";
 
     return bytes;
 
@@ -881,7 +881,7 @@ unsigned int LteAmc::computeBitsOnNRbs_MB(MacNodeId id, Band b,  unsigned int bl
 
     // DEBUG
     EV << NOW << " LteAmc::computeBitsOnNRbs_MB Resource Blocks: " << blocks << "\n";
-    EV << NOW << " LteAmc::computeBitsOnNRbs_MB Available space: " << tbsVect[blocks-1] << "\n";
+    EV << NOW << " LteAmc::computeBitsOnNRbs_MB Available Bits: " << tbsVect[blocks-1] << "\n";
 
     return tbsVect[blocks - 1];
 
