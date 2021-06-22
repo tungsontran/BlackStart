@@ -65,7 +65,6 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
         // The first vertex in pair is the minimum distance vertex, extract it from priority queue.
         // vertex label is stored in second of pair (it has to be done this way to keep the vertices
         // sorted distance (distance must be first item in pair)
-        // (@Tung: actually this is not true. I reversed the order and it worked fine???)
         int u = pq.top().second;
 
         pq.pop();
@@ -74,7 +73,7 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
         for (auto x : adj[u])
         {
             // Get vertex label and weight of current adjacent of u.
-            int v = x.first;
+            MacNodeId v = x.first;
             double weight = x.second;
             // If there is shorted path to v through u.
             if (!sptSet[v] && weight && dist[v] > dist[u] + weight)
