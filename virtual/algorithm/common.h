@@ -27,8 +27,10 @@ typedef std::vector<std::vector<weight>> adjMatrix;
 MacNodeId getAdjIndex(adjMap v, MacNodeId K);
 // get a vector of nodeIDs, the indices of this vector are the vertex IDs
 adjMap getAdjMap(MacNodeId enbCount, MacNodeId vueCount);
-// add an edge to the graph
-void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt);
+// add an symmetric edge to the graph
+void addEdgeSymmetric(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt);
+// add an asymmetric edge to the graph
+void addEdgeAsymmetric(adjMatrix& adj, MacNodeId u, MacNodeId v, double wU, double wD);
 // Function to print shortest path from source to j using parent array
 void printPath(std::vector<MacNodeId>& parent, MacNodeId j);
 // A utility function to print the constructed distance array
@@ -37,7 +39,7 @@ void printSolution(std::vector<double> dist, int V, std::vector<MacNodeId> paren
 MacNodeId getNextHop(std::vector<MacNodeId> parent, MacNodeId src, MacNodeId dst);
 
 enum routingMetric {
-    HOP, CQI, ETX
+    HOP, CQI, ETX, ETT
 };
 
 routingMetric getRoutingMetric (const char* weight);

@@ -24,9 +24,14 @@ adjMap getAdjMap(MacNodeId enbCount, MacNodeId vueCount)
     return result;
 }
 
-void addEdge(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt)
+void addEdgeAsymmetric(adjMatrix& adj, MacNodeId u, MacNodeId v, double wU, double wD)
 {
-//    EV << "Addding edge " << u << " " << v << " " << wt << endl;
+    adj[u].push_back(std::make_pair(v, wD));
+    adj[v].push_back(std::make_pair(u, wU));
+}
+
+void addEdgeSymmetric(adjMatrix& adj, MacNodeId u, MacNodeId v, double wt)
+{
     adj[u].push_back(std::make_pair(v, wt));
     adj[v].push_back(std::make_pair(u, wt));
 }
@@ -37,6 +42,8 @@ routingMetric getRoutingMetric (const char* metric)
         return CQI;
     else if (!strcmp(metric,"ETX"))
         return ETX;
+    else if (!strcmp(metric,"ETT"))
+            return ETT;
     return HOP;
 }
 
