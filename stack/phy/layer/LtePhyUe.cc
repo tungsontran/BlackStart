@@ -157,10 +157,9 @@ void LtePhyUe::dynamicCellAsociate()
         cInfo->setFrameType(FEEDBACKPKT);
 
         // get RSSI from the eNB
-        std::vector<double>::iterator it;
         double rssi = 0;
         std::vector<double> rssiV = channelModel_->getSINR(frame, cInfo);
-        for (it = rssiV.begin(); it != rssiV.end(); ++it)
+        for (auto it = rssiV.begin(); it != rssiV.end(); ++it)
             rssi += *it;
         rssi /= rssiV.size();   // compute the mean over all RBs
 
