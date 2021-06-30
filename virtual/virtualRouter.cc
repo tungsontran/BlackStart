@@ -306,7 +306,7 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
            case CQI:
            {
                w = 1/jt.second.second[0].first;                // weighting by CQI, inverse to minimize
-               w_min = 0.0666667;                              // max CQI is 15 so min weight is 1/15
+               w_min = (double) 1/15;                          // max CQI is 15 so min weight is 1/15
                addEdgeSymmetric(adj,u,v,w);
                break;
            }

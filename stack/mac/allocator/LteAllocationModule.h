@@ -207,7 +207,7 @@ class LteAllocationModule
     // ***************************************************************
 
     // ************** Resource Blocks Allocation Methods **************
-    // tries to satisfy the resource block request in the given band and for the fiven antenna
+    // tries to satisfy the resource block request in the given band and for the given antenna
     bool addBlocks(const Remote antenna, const Band band, const MacNodeId nodeId, const unsigned int blocks,
         const unsigned int bytes);
 

@@ -98,7 +98,7 @@ bool LteSchedulerEnbUl::racschedule()
                 {
                     allocator_->addBlocks(MACRO,b,nodeId,1,bytes);
 
-                    EV << NOW << "LteSchedulerEnbUl::racschedule UE: " << nodeId << "Handled RAC on band: " << b << endl;
+                    EV << NOW << "LteSchedulerEnbUl::racschedule UE: " << nodeId << " Handled RAC on band: " << b << endl;
 
                     allocation=true;
                     break;
@@ -111,7 +111,7 @@ bool LteSchedulerEnbUl::racschedule()
             // create scList id for current cid/codeword
             MacCid cid = idToMacCid(nodeId, SHORT_BSR);  // build the cid. Since this grant will be used for a BSR,
                                                          // we use the LCID corresponding to the SHORT_BSR
-            std::pair<unsigned int,Codeword> scListId = std::pair<unsigned int,Codeword>(cid,cw);
+            std::pair<MacCid,Codeword> scListId = std::pair<MacCid,Codeword>(cid,cw);
             scheduleList_[scListId]=blocks;
         }
     }

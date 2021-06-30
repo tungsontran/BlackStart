@@ -472,7 +472,7 @@ void LteMacUe::macPduMake(MacCid cid)
             bsr->setSize(size);
             macPkt->pushCe(bsr);
             bsrTriggered_ = false;
-            EV << "LteMacUe::macPduMake - BSR with size " << size << "created" << endl;
+            EV << "LteMacUe::macPduMake - BSR with size " << size << " created" << endl;
         }
 
         EV << "LteMacUe: pduMaker created PDU: " << macPkt->info() << endl;
