@@ -2158,6 +2158,9 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
        {
            // compute the number of occupied slot (unnecessary)
            allocatedUes = binder_->getUlTransmissionMap(CURR_TTI, i);
+           if (NOW == 0)
+               continue;
+
            if (allocatedUes->empty()) // no UEs allocated on this band
                continue;
 
@@ -2199,6 +2202,9 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
                continue;
 
            allocatedUes = binder_->getUlTransmissionMap(PREV_TTI, i);
+           if (NOW == 0)
+               continue;
+
            if (allocatedUes->empty()) // no UEs allocated on this band
                continue;
 
