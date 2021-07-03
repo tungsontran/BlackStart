@@ -42,7 +42,6 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
 
     // get the usable bands for this user
     UsableBands* usableB = nullptr;
-    bool ret = getUsableBands(id, usableB);
 
     Band chosenBand = 0;
     double chosenCqi = 0;
