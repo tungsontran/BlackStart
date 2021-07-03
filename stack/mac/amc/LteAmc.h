@@ -203,9 +203,6 @@ class LteAmc
     std::vector<Cqi>  readMultiBandCqi(MacNodeId id, const Direction dir);
 
     int getSystemNumBands() { return numBands_; }
-
-    ueCqi getUeCqi(){return ueCqi_;}
-    void setUeCqi(MacNodeId nodeId, Cqi cqi);
 };
 
 #endif

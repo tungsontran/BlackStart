@@ -73,7 +73,7 @@ class virtualRouter : public cSimpleModule
     // Add new entry to a table
     void addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry);
     // Set CQI of direct neighbor nodes to the tables
-    void setDirectNeighborsCQI(const ueCqi uecqi);
+    void setDirectNeighborsCQI(const MacNodeId id, const Cqi CqiUL, const Cqi CqiDL);
     // Set ETX of direct neighbor nodes to the tables
     void setDirectNeighborsETX(const ueEtx ueetx);
     /*

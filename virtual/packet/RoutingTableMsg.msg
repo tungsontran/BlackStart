@@ -17,9 +17,8 @@ cplusplus {{
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include <vector>
 typedef unsigned short MacNodeId;
-typedef unsigned short Cqi;
-typedef std::map<MacNodeId,std::pair<MacNodeId,Cqi>> ueEnbCqi;
-typedef std::pair<MacNodeId,ueEnbCqi> virtualRoutingTableEntry;
+typedef std::map<MacNodeId,std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,3>>> ueEnbCost;
+typedef std::pair<MacNodeId,ueEnbCost> virtualRoutingTableEntry;
 typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
 }}
 

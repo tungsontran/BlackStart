@@ -410,35 +410,6 @@ void LteAmc::pushFeedback(MacNodeId id, Direction dir, LteFeedback fb)
     fb.print(0,id,dir,"LteAmc::pushFeedback");
 //    EV << "SUMMARY" << endl;
 //    (*history)[antenna].at(index).at(txMode).get().print(0,id,dir,txMode,"LteAmc::pushFeedback");
-    if (getNodeSubTypeById(id) == VUE)
-    {
-        CqiVector cqiVec = fb.getBandCqi(0);
-        PilotComputationModes mode = pilot_->getMode();
-        Cqi cqi = 0;
-        if (mode == MIN_CQI)
-        {
-            cqi = *std::min_element(cqiVec.begin(),cqiVec.end());
-        }
-        else if (mode == MAX_CQI)
-        {
-            cqi = *std::max_element(cqiVec.begin(),cqiVec.end());
-        }
-        setUeCqi(id,cqi);
-    }
-}
-
-void LteAmc::setUeCqi(MacNodeId nodeId, Cqi cqi)
-{
-    EV << "AmcPilot::setUeCqi Registering UE " << nodeId << " with corresponding CQI " << cqi << endl;
-    ueCqi::iterator jt;
-    for (auto jt: ueCqi_)
-        EV << "AmcPilot::setUeCqi ueCqi content is ID: " << jt.first << " CQI: " << jt.second << endl;
-    ueCqi::iterator it = ueCqi_.find(nodeId);
-    if(it == ueCqi_.end())      // UE not registered, insert new pair
-        ueCqi_.insert(std::pair<MacNodeId, Cqi>(nodeId,cqi));
-    else {                      // UE registered, if value changes then update it
-        it->second = cqi;
-    }
 }
 
 void LteAmc::pushFeedbackD2D(MacNodeId id, LteFeedback fb, MacNodeId peerId)

@@ -58,10 +58,12 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
         {
             EV << "Owner_ID " << jt.second.first
                << " - vUE_ID " << jt.first
-               << " - CQI " << jt.second.second[0].first
+               << " - CQI UL " << jt.second.second[0].first
                << " (" << jt.second.second[0].second << ")"
-               << " - ETX " << jt.second.second[1].first
-               << " (" << jt.second.second[1].second << ")" << endl;
+               << " - CQI DL " << jt.second.second[1].first
+               << " (" << jt.second.second[1].second << ")"
+               << " - ETX " << jt.second.second[2].first
+               << " (" << jt.second.second[2].second << ")" << endl;
         }
         table.push_back(entry);
         return;
@@ -79,46 +81,57 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                 {
                     EV << "Owner_ID " << it->second.first
                        << " - vUE_ID " << it->first
-                       << " - CQI " << it->second.second[0].first
+                       << " - CQI UL " << it->second.second[0].first
                        << " (" << it->second.second[0].second << ")"
-                       << " - ETX " << it->second.second[1].first
-                       << " (" << it->second.second[1].second << ")" << endl;
+                       << " - CQI DL " << it->second.second[1].first
+                       << " (" << it->second.second[1].second << ")"
+                       << " - ETX " << it->second.second[2].first
+                       << " (" << it->second.second[2].second << ")" << endl;
                     // iterate through vUE list of the adding entry
                     for (auto jt = entry.second.begin(); jt != entry.second.end(); ++jt)
                     {
                         if (it->first == jt->first)    // match vUE ID of the 2 entries
                         {
                             EV << "Found sub-entry for vUE " << it->first << endl;
-                            // if adding entry has newer CQI, update old CQI in the table
+                            // if adding entry has newer UL CQI, update old CQI in the table
                             if (it->second.second[0].second < jt->second.second[0].second)
                             {
                                 it->second.second[0].first = jt->second.second[0].first;
                                 it->second.second[0].second = jt->second.second[0].second;
                             }
-                            // if adding entry has newer ETX, update old ETX in the table
+                            // if adding entry has newer DL CQI, update old CQI in the table
                             if (it->second.second[1].second < jt->second.second[1].second)
                             {
                                 it->second.second[1].first = jt->second.second[1].first;
                                 it->second.second[1].second = jt->second.second[1].second;
                             }
+                            // if adding entry has newer ETX, update old ETX in the table
+                            if (it->second.second[2].second < jt->second.second[2].second)
+                            {
+                                it->second.second[2].first = jt->second.second[2].first;
+                                it->second.second[2].second = jt->second.second[2].second;
+                            }
                         }
                         else if (std::next(it) == table_entry->second.end())
                         {   // @TODO: extremely inelegant lol
                             EV << "Sub-entry for vUE " << it->first << " not found, adding it to the table" << endl;
-                            std::pair<double,simtime_t> cqi_time = std::make_pair(jt->second.second[0].first,jt->second.second[0].second);
-                            std::pair<double,simtime_t> etx_time = std::make_pair(jt->second.second[1].first,jt->second.second[1].second);
-                            std::array<std::pair<double,simtime_t>,2> costArray= {cqi_time,etx_time};
-                            std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,2>> ownerCost = std::make_pair(jt->second.first,costArray);
+                            std::pair<double,simtime_t> cqiUL_time = std::make_pair(jt->second.second[0].first,jt->second.second[0].second);
+                            std::pair<double,simtime_t> cqiDL_time = std::make_pair(jt->second.second[1].first,jt->second.second[1].second);
+                            std::pair<double,simtime_t> etx_time = std::make_pair(jt->second.second[2].first,jt->second.second[2].second);
+                            std::array<std::pair<double,simtime_t>,3> costArray= {{cqiUL_time, cqiDL_time, etx_time}};
+                            std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,3>> ownerCost = std::make_pair(jt->second.first,costArray);
                             table_entry->second.insert(std::make_pair(jt->first,ownerCost));
                         }
                     }
                     EV << "Updated entry for Master_ID " << table_entry->first << endl;
                     EV << "Owner_ID " << it->second.first
                        << " - vUE_ID " << it->first
-                       << " - CQI " << it->second.second[0].first
+                       << " - CQI UL " << it->second.second[0].first
                        << " (" << it->second.second[0].second << ")"
-                       << " - ETX " << it->second.second[1].first
-                       << " (" << it->second.second[1].second << ")" << endl;
+                       << " - CQI DL " << it->second.second[1].first
+                       << " (" << it->second.second[1].second << ")"
+                       << " - ETX " << it->second.second[2].first
+                       << " (" << it->second.second[2].second << ")" << endl;
                 }
                 return;
             }
@@ -130,11 +143,13 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                 for (auto jt: entry.second)
                 {
                     EV << "Owner_ID " << jt.second.first
-                                   << " - vUE_ID " << jt.first
-                                   << " - CQI " << jt.second.second[0].first
-                                   << " (" << jt.second.second[0].second << ")"
-                                   << " - ETX " << jt.second.second[1].first
-                                   << " (" << jt.second.second[1].second << ")" << endl;
+                       << " - vUE_ID " << jt.first
+                       << " - CQI UL " << jt.second.second[0].first
+                       << " (" << jt.second.second[0].second << ")"
+                       << " - CQI DL " << jt.second.second[1].first
+                       << " (" << jt.second.second[1].second << ")"
+                       << " - ETX " << jt.second.second[2].first
+                       << " (" << jt.second.second[2].second << ")" << endl;
                 }
                 table.push_back(entry);
                 return;
@@ -143,25 +158,26 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
     }
 }
 
-void virtualRouter::setDirectNeighborsCQI(const ueCqi uecqi)
+void virtualRouter::setDirectNeighborsCQI(const MacNodeId id, const Cqi CqiUL, const Cqi CqiDL)
 {
-    directNeighbors_.first = nodeId_;                                         // entry header (master ID)
-    for (auto it: uecqi)
-    {
-        directNeighbors_.second[it.first].first = getOwnerId(it.first);       // owner ID corresponding to vUE ID
-        directNeighbors_.second[it.first].second[0].first = it.second;        // CQI
-        directNeighbors_.second[it.first].second[0].second = NOW;             // CQI write time stamp
-    }
+    directNeighbors_.first = nodeId_;                               // entry header (master ID)
+
+    directNeighbors_.second[id].first = getOwnerId(id);             // owner ID corresponding to vUE ID
+    directNeighbors_.second[id].second[0].first = CqiUL;            // CQI UL
+    directNeighbors_.second[id].second[0].second = NOW;             // CQI UL write time stamp
+    directNeighbors_.second[id].second[1].first = CqiDL;            // CQI DL
+    directNeighbors_.second[id].second[1].second = NOW;             // CQI DL write time stamp
+
     addTableEntry(networkTopoTable_, directNeighbors_);
-    printDirectNeighbors();
+//    printDirectNeighbors();
 }
 
 void virtualRouter::setDirectNeighborsETX(const ueEtx ueetx)
 {
-    directNeighbors_.second[ueetx.first].second[1].first = ueetx.second;      // ETX
-    directNeighbors_.second[ueetx.first].second[1].second = NOW;              // ETX write time stamp
+    directNeighbors_.second[ueetx.first].second[2].first = ueetx.second;      // ETX
+    directNeighbors_.second[ueetx.first].second[2].second = NOW;              // ETX write time stamp
     addTableEntry(networkTopoTable_, directNeighbors_);
-    printDirectNeighbors();
+//    printDirectNeighbors();
 }
 
 virtualRoutingTableEntry virtualRouter::getDirectNeighbors()
@@ -182,10 +198,12 @@ void virtualRouter::printDirectNeighbors()
     {
         EV << "virtualRouter::printDirectNeighbors(): vUE " << it.first
                                          << ", Owner E2NB " << it.second.first
-                                         << ", CQI: " << it.second.second[0].first
+                                         << ", CQI UL: " << it.second.second[0].first
                                          << " (" << it.second.second[0].second << ")"
-                                         << ", ETX: " << it.second.second[1].first
-                                         << " (" << it.second.second[1].second << ")" << endl;
+                                         << ", CQI DL: " << it.second.second[1].first
+                                         << " (" << it.second.second[1].second << ")"
+                                         << ", ETX: " << it.second.second[2].first
+                                         << " (" << it.second.second[2].second << ")" << endl;
     }
 }
 
@@ -200,10 +218,12 @@ void virtualRouter::printTable(const virtualRoutingTable table, const char* name
         {
             EV << "Owner ENB " << it.second.first
                << ", vUE " << it.first
-               << ", CQI = " << it.second.second[0].first
+               << ", CQI UL = " << it.second.second[0].first
                << " (" << it.second.second[0].second << ")"
-               << ", ETX = " << it.second.second[1].first
-               << " (" << it.second.second[0].second << ")" << endl;
+               << ", CQI DL = " << it.second.second[1].first
+               << " (" << it.second.second[1].second << ")"
+               << ", ETX = " << it.second.second[2].first
+               << " (" << it.second.second[2].second << ")" << endl;
         }
     }
     EV << "virtualRouter::printTable(): ***** End Print Table *****" << endl;
@@ -305,14 +325,15 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
            }
            case CQI:
            {
-               w = 1/jt.second.second[0].first;                // weighting by CQI, inverse to minimize
+               wU = 1/jt.second.second[0].first;               // weighting by CQI UL, inverse to minimize
+               wD = 1/jt.second.second[1].first;               // weighting by CQI DL
                w_min = (double) 1/15;                          // max CQI is 15 so min weight is 1/15
-               addEdgeSymmetric(adj,u,v,w);
+               addEdgeAsymmetric(adj,u,v,wU,wD);
                break;
            }
            case ETX:
            {
-               w = jt.second.second[1].first;                  // weighting by ETX
+               w = jt.second.second[2].first;                  // weighting by ETX
                w_min = 1;
                addEdgeSymmetric(adj,u,v,w);
                break;

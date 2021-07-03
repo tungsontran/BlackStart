@@ -916,7 +916,6 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
 
     for (it = fbMapDl.begin(); it != fbMapDl.end(); ++it)
     {
-        unsigned int i = 0;
         for (jt = it->begin(); jt != it->end(); ++jt)
         {
             //            TxMode rx=(TxMode)i;
@@ -926,7 +925,6 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
                 // LteMacUe* macUe = check_and_cast<LteMacUe*>(getMacByMacNodeId(id));
                 //  macUe->collectCqiStatistics(id, DL, (*jt));
             }
-            i++;
         }
     }
     for (it = fbMapUl.begin(); it != fbMapUl.end(); ++it)
@@ -937,8 +935,14 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
                 amc_->pushFeedback(id, UL, (*jt));
         }
     }
-    ueCqi ueCqi_ = getAmc()->getUeCqi();
-    virtualRouter_->setDirectNeighborsCQI(ueCqi_);
+    if (getNodeSubTypeById(id) == VUE)
+    {
+        CqiVector cqiul = amc_->getFeedback(id, MACRO, TRANSMIT_DIVERSITY, UL).getCqi(0); // @TODO make it configurable
+        CqiVector cqidl = amc_->getFeedback(id, MACRO, TRANSMIT_DIVERSITY, DL).getCqi(0);
+        Cqi CqiUL = *std::max_element(cqiul.begin(),cqiul.end());
+        Cqi CqiDL = *std::max_element(cqidl.begin(),cqidl.end());
+        virtualRouter_->setDirectNeighborsCQI(id, CqiUL, CqiDL);
+    }
     delete fb;
 }
 
