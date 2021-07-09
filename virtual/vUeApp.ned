@@ -20,6 +20,7 @@ simple vUeApp
 {
     parameters:
         int numVUE = default(0);
+        bool enableLSA = default(false);
         @display("i=block/app");
     gates:
         inout extIO[numVUE];        

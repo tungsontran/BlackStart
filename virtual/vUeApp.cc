@@ -8,6 +8,7 @@ void vUeApp::initialize(int stage)
     binder_ = getBinder();
     ownerType_ = selectOwnerType(getAncestorPar("nodeType"));
     nodeId_ = getAncestorPar("macNodeId");
+    enableLSA_ = par("enableLSA");
     if (stage == INITSTAGE_NETWORK_LAYER)
     {
         if (ownerType_ == UE)
@@ -23,7 +24,7 @@ void vUeApp::initialize(int stage)
         }
     }
 
-    if (stage == INITSTAGE_LOCAL && ownerType_ == UE)
+    if (stage == INITSTAGE_LOCAL && ownerType_ == UE && enableLSA_ == true)
     {
         lsa_ = nullptr;
         lsaTimer_ = getAncestorPar("lsaTimer");

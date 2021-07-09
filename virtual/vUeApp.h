@@ -18,8 +18,11 @@ class vUeApp : public cSimpleModule
     LteNodeType ownerType_;
     LteNodeType selectOwnerType(const char * type);
 
-    // for LSA in vUE
+    /* for LSA in vUE */
+    // Router reference
     virtualRouter* vRouter_;
+    // enable LSA on UL
+    bool enableLSA_;
     // lsa self msg
     cMessage* lsa_;
     // Timer to send LSA again
