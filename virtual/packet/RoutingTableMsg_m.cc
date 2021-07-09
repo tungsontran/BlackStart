@@ -247,22 +247,22 @@ void RoutingTableMsg_Base::setDestId(const MacNodeId& destId)
     this->destId = destId;
 }
 
-inet::IPv4Address& RoutingTableMsg_Base::getSourceAddr()
+IPv4Address& RoutingTableMsg_Base::getSourceAddr()
 {
     return this->sourceAddr;
 }
 
-void RoutingTableMsg_Base::setSourceAddr(const inet::IPv4Address& sourceAddr)
+void RoutingTableMsg_Base::setSourceAddr(const IPv4Address& sourceAddr)
 {
     this->sourceAddr = sourceAddr;
 }
 
-inet::IPv4Address& RoutingTableMsg_Base::getDestAddr()
+IPv4Address& RoutingTableMsg_Base::getDestAddr()
 {
     return this->destAddr;
 }
 
-void RoutingTableMsg_Base::setDestAddr(const inet::IPv4Address& destAddr)
+void RoutingTableMsg_Base::setDestAddr(const IPv4Address& destAddr)
 {
     this->destAddr = destAddr;
 }
@@ -510,8 +510,8 @@ const char *RoutingTableMsgDescriptor::getFieldStructName(int field) const
     switch (field) {
         case 0: return omnetpp::opp_typename(typeid(MacNodeId));
         case 1: return omnetpp::opp_typename(typeid(MacNodeId));
-        case 2: return omnetpp::opp_typename(typeid(inet::IPv4Address));
-        case 3: return omnetpp::opp_typename(typeid(inet::IPv4Address));
+        case 2: return omnetpp::opp_typename(typeid(IPv4Address));
+        case 3: return omnetpp::opp_typename(typeid(IPv4Address));
         case 4: return omnetpp::opp_typename(typeid(virtualRoutingTable));
         default: return nullptr;
     };

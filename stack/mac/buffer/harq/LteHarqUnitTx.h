@@ -90,8 +90,10 @@ class LteHarqUnitTx
     simsignal_t harqErrorRateD2D_4_;
 
     // calculating ETX metric
-    double rtxCnt_;
-    double txCnt_;
+    double rtxCntUL_;
+    double txCntUL_;
+    double rtxCntDL_;
+    double txCntDL_;
 
     // reference to virtual router
     virtualRouter* virtualRouter_;
@@ -212,7 +214,7 @@ class LteHarqUnitTx
 
     // caculate the expected transmission count based on successfully & unsuccessfully
     // transmission, through harq ACK & NACK. The result is writen directly to the virtual router.
-    ueEtx calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt);
+    double calculateEtx(double txCnt, double rtxCnt);
   protected:
 
     virtual void resetUnit();

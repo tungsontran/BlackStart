@@ -23,7 +23,7 @@
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include <vector>
 typedef unsigned short MacNodeId;
-typedef std::map<MacNodeId,std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,3>>> ueEnbCost;
+typedef std::map<MacNodeId,std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,4>>> ueEnbCost;
 typedef std::pair<MacNodeId,ueEnbCost> virtualRoutingTableEntry;
 typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
 // }}
@@ -66,13 +66,14 @@ typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
  * Register_Class(RoutingTableMsg)
  * </pre>
  */
+using namespace inet;
 class RoutingTableMsg_Base : public ::omnetpp::cPacket
 {
   protected:
     MacNodeId sourceId;
     MacNodeId destId;
-    inet::IPv4Address sourceAddr;
-    inet::IPv4Address destAddr;
+    IPv4Address sourceAddr;
+    IPv4Address destAddr;
     virtualRoutingTable table;
 
   private:
@@ -100,12 +101,12 @@ class RoutingTableMsg_Base : public ::omnetpp::cPacket
     virtual MacNodeId& getDestId();
     virtual const MacNodeId& getDestId() const {return const_cast<RoutingTableMsg_Base*>(this)->getDestId();}
     virtual void setDestId(const MacNodeId& destId);
-    virtual inet::IPv4Address& getSourceAddr();
-    virtual const inet::IPv4Address& getSourceAddr() const {return const_cast<RoutingTableMsg_Base*>(this)->getSourceAddr();}
-    virtual void setSourceAddr(const inet::IPv4Address& sourceAddr);
-    virtual inet::IPv4Address& getDestAddr();
-    virtual const inet::IPv4Address& getDestAddr() const {return const_cast<RoutingTableMsg_Base*>(this)->getDestAddr();}
-    virtual void setDestAddr(const inet::IPv4Address& destAddr);
+    virtual IPv4Address& getSourceAddr();
+    virtual const IPv4Address& getSourceAddr() const {return const_cast<RoutingTableMsg_Base*>(this)->getSourceAddr();}
+    virtual void setSourceAddr(const IPv4Address& sourceAddr);
+    virtual IPv4Address& getDestAddr();
+    virtual const IPv4Address& getDestAddr() const {return const_cast<RoutingTableMsg_Base*>(this)->getDestAddr();}
+    virtual void setDestAddr(const IPv4Address& destAddr);
     virtual virtualRoutingTable& getTable();
     virtual const virtualRoutingTable& getTable() const {return const_cast<RoutingTableMsg_Base*>(this)->getTable();}
     virtual void setTable(const virtualRoutingTable& table);

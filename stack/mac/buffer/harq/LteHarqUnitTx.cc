@@ -53,8 +53,10 @@ LteHarqUnitTx::LteHarqUnitTx(unsigned char acid, Codeword cw,
             virtualRouter_ = nullptr;
         }
     }
-    rtxCnt_ = 0;
-    txCnt_ = 1;
+    rtxCntDL_ = 0;
+    txCntDL_ = 1;
+    rtxCntUL_ = 0;
+    txCntUL_ = 1;
 }
 
 void LteHarqUnitTx::insertPdu(LteMacPdu *pdu)
@@ -132,12 +134,18 @@ bool LteHarqUnitTx::pduFeedback(HarqAcknowledgment a)
         resetUnit();
         reset = true;
         sample = 0;
-        txCnt_++;
+        if (macOwner_->getNodeType() == ENODEB)
+            txCntDL_++;
+        else
+            txCntUL_++;
     }
     else if (a == HARQNACK)
     {
         sample = 1;
-        rtxCnt_++;
+        if (macOwner_->getNodeType() == ENODEB)
+            rtxCntDL_++;
+        else
+            rtxCntUL_++;
         if (transmissions_ == (maxHarqRtx_ + 1))
         {
             // discard
@@ -207,22 +215,21 @@ bool LteHarqUnitTx::pduFeedback(HarqAcknowledgment a)
         MacNodeId ueId = dstMac_->getMacNodeId();
         if (getNodeSubTypeById(ueId) == VUE)
         {
-            ueEtx ueetx = calculateEtx(ueId,txCnt_,rtxCnt_);
-            virtualRouter_->setDirectNeighborsETX(ueetx);
+            double etxUL = calculateEtx(txCntUL_,rtxCntUL_);
+            EV << "LteHarqUnitTx::calculateEtx - Calculating ETX of uplink "<< ueId
+               << " - " << getBinder()->getNextHop(ueId) << ", ETX is " << etxUL << endl;
+            double etxDL = calculateEtx(txCntDL_,rtxCntDL_);
+            EV << "LteHarqUnitTx::calculateEtx - Calculating ETX of downlink "<< getBinder()->getNextHop(ueId)
+               << " - " << ueId << ", ETX is " << etxDL << endl;
+            virtualRouter_->setDirectNeighborsETX(ueId,etxUL,etxDL);
         }
     }
     return reset;
 }
 
-ueEtx LteHarqUnitTx::calculateEtx(MacNodeId ueId, double txCnt, double rtxCnt)
+double LteHarqUnitTx::calculateEtx(double txCnt, double rtxCnt)
 {
-    double etx = 1 + rtxCnt/txCnt;
-    EV << "LteHarqUnitTx::calculateEtx - Calculating ETX of link "<< getBinder()->getNextHop(ueId)
-           << " - " << ueId << ", ETX is " << etx << endl;
-    ueEtx ueetx;
-    ueetx.first = ueId;
-    ueetx.second = etx;
-    return ueetx;
+    return (1 + rtxCnt/txCnt);
 }
 
 bool LteHarqUnitTx::isEmpty()

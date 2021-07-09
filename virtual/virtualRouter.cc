@@ -62,8 +62,10 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                << " (" << jt.second.second[0].second << ")"
                << " - CQI DL " << jt.second.second[1].first
                << " (" << jt.second.second[1].second << ")"
-               << " - ETX " << jt.second.second[2].first
-               << " (" << jt.second.second[2].second << ")" << endl;
+               << " - ETX UL " << jt.second.second[2].first
+               << " (" << jt.second.second[2].second << ")"
+               << " - ETX DL " << jt.second.second[3].first
+               << " (" << jt.second.second[3].second << ")" << endl;
         }
         table.push_back(entry);
         return;
@@ -85,8 +87,10 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                        << " (" << it->second.second[0].second << ")"
                        << " - CQI DL " << it->second.second[1].first
                        << " (" << it->second.second[1].second << ")"
-                       << " - ETX " << it->second.second[2].first
-                       << " (" << it->second.second[2].second << ")" << endl;
+                       << " - ETX UL " << it->second.second[2].first
+                       << " (" << it->second.second[2].second << ")"
+                       << " - ETX DL " << it->second.second[3].first
+                       << " (" << it->second.second[3].second << ")" << endl;
                     // iterate through vUE list of the adding entry
                     for (auto jt = entry.second.begin(); jt != entry.second.end(); ++jt)
                     {
@@ -105,11 +109,17 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                                 it->second.second[1].first = jt->second.second[1].first;
                                 it->second.second[1].second = jt->second.second[1].second;
                             }
-                            // if adding entry has newer ETX, update old ETX in the table
+                            // if adding entry has newer UL ETX, update old ETX in the table
                             if (it->second.second[2].second < jt->second.second[2].second)
                             {
                                 it->second.second[2].first = jt->second.second[2].first;
                                 it->second.second[2].second = jt->second.second[2].second;
+                            }
+                            // if adding entry has newer DL ETX, update old ETX in the table
+                            if (it->second.second[3].second < jt->second.second[3].second)
+                            {
+                                it->second.second[3].first = jt->second.second[3].first;
+                                it->second.second[3].second = jt->second.second[3].second;
                             }
                         }
                         else if (std::next(it) == table_entry->second.end())
@@ -117,9 +127,10 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                             EV << "Sub-entry for vUE " << it->first << " not found, adding it to the table" << endl;
                             std::pair<double,simtime_t> cqiUL_time = std::make_pair(jt->second.second[0].first,jt->second.second[0].second);
                             std::pair<double,simtime_t> cqiDL_time = std::make_pair(jt->second.second[1].first,jt->second.second[1].second);
-                            std::pair<double,simtime_t> etx_time = std::make_pair(jt->second.second[2].first,jt->second.second[2].second);
-                            std::array<std::pair<double,simtime_t>,3> costArray= {{cqiUL_time, cqiDL_time, etx_time}};
-                            std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,3>> ownerCost = std::make_pair(jt->second.first,costArray);
+                            std::pair<double,simtime_t> etxUL_time = std::make_pair(jt->second.second[2].first,jt->second.second[2].second);
+                            std::pair<double,simtime_t> etxDL_time = std::make_pair(jt->second.second[3].first,jt->second.second[3].second);
+                            std::array<std::pair<double,simtime_t>,4> costArray= {{cqiUL_time, cqiDL_time, etxUL_time, etxDL_time}};
+                            std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,4>> ownerCost = std::make_pair(jt->second.first,costArray);
                             table_entry->second.insert(std::make_pair(jt->first,ownerCost));
                         }
                     }
@@ -130,8 +141,10 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                        << " (" << it->second.second[0].second << ")"
                        << " - CQI DL " << it->second.second[1].first
                        << " (" << it->second.second[1].second << ")"
-                       << " - ETX " << it->second.second[2].first
-                       << " (" << it->second.second[2].second << ")" << endl;
+                       << " - ETX UL " << it->second.second[2].first
+                       << " (" << it->second.second[2].second << ")"
+                       << " - ETX DL " << it->second.second[3].first
+                       << " (" << it->second.second[3].second << ")" << endl;
                 }
                 return;
             }
@@ -148,8 +161,10 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
                        << " (" << jt.second.second[0].second << ")"
                        << " - CQI DL " << jt.second.second[1].first
                        << " (" << jt.second.second[1].second << ")"
-                       << " - ETX " << jt.second.second[2].first
-                       << " (" << jt.second.second[2].second << ")" << endl;
+                       << " - ETX UL " << jt.second.second[2].first
+                       << " (" << jt.second.second[2].second << ")"
+                       << " - ETX DL " << jt.second.second[3].first
+                       << " (" << jt.second.second[3].second << ")" << endl;
                 }
                 table.push_back(entry);
                 return;
@@ -158,26 +173,27 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
     }
 }
 
-void virtualRouter::setDirectNeighborsCQI(const MacNodeId id, const Cqi CqiUL, const Cqi CqiDL)
+void virtualRouter::setDirectNeighborsCQI(const MacNodeId vUEid, const Cqi CqiUL, const Cqi CqiDL)
 {
-    directNeighbors_.first = nodeId_;                               // entry header (master ID)
+    directNeighbors_.first = nodeId_;                                  // entry header (master ID)
 
-    directNeighbors_.second[id].first = getOwnerId(id);             // owner ID corresponding to vUE ID
-    directNeighbors_.second[id].second[0].first = CqiUL;            // CQI UL
-    directNeighbors_.second[id].second[0].second = NOW;             // CQI UL write time stamp
-    directNeighbors_.second[id].second[1].first = CqiDL;            // CQI DL
-    directNeighbors_.second[id].second[1].second = NOW;             // CQI DL write time stamp
+    directNeighbors_.second[vUEid].first = getOwnerId(vUEid);          // owner ID corresponding to vUE ID
+    directNeighbors_.second[vUEid].second[0].first = CqiUL;            // CQI UL
+    directNeighbors_.second[vUEid].second[0].second = NOW;             // CQI UL write time stamp
+    directNeighbors_.second[vUEid].second[1].first = CqiDL;            // CQI DL
+    directNeighbors_.second[vUEid].second[1].second = NOW;             // CQI DL write time stamp
 
     addTableEntry(networkTopoTable_, directNeighbors_);
-//    printDirectNeighbors();
 }
 
-void virtualRouter::setDirectNeighborsETX(const ueEtx ueetx)
+void virtualRouter::setDirectNeighborsETX(const MacNodeId vUEid, const double etxUL, const double etxDL)
 {
-    directNeighbors_.second[ueetx.first].second[2].first = ueetx.second;      // ETX
-    directNeighbors_.second[ueetx.first].second[2].second = NOW;              // ETX write time stamp
+    directNeighbors_.second[vUEid].second[2].first = etxUL;            // ETX UL
+    directNeighbors_.second[vUEid].second[2].second = NOW;             // ETX UL write time stamp
+    directNeighbors_.second[vUEid].second[3].first = etxDL;            // ETX DL
+    directNeighbors_.second[vUEid].second[3].second = NOW;             // ETX DL write time stamp
+
     addTableEntry(networkTopoTable_, directNeighbors_);
-//    printDirectNeighbors();
 }
 
 virtualRoutingTableEntry virtualRouter::getDirectNeighbors()
@@ -202,8 +218,10 @@ void virtualRouter::printDirectNeighbors()
                                          << " (" << it.second.second[0].second << ")"
                                          << ", CQI DL: " << it.second.second[1].first
                                          << " (" << it.second.second[1].second << ")"
-                                         << ", ETX: " << it.second.second[2].first
-                                         << " (" << it.second.second[2].second << ")" << endl;
+                                         << ", ETX UL: " << it.second.second[2].first
+                                         << " (" << it.second.second[2].second << ")"
+                                         << ", ETX DL: " << it.second.second[3].first
+                                         << " (" << it.second.second[3].second << ")" << endl;
     }
 }
 
@@ -222,8 +240,10 @@ void virtualRouter::printTable(const virtualRoutingTable table, const char* name
                << " (" << it.second.second[0].second << ")"
                << ", CQI DL = " << it.second.second[1].first
                << " (" << it.second.second[1].second << ")"
-               << ", ETX = " << it.second.second[2].first
-               << " (" << it.second.second[2].second << ")" << endl;
+               << ", ETX UL = " << it.second.second[2].first
+               << " (" << it.second.second[2].second << ")"
+               << ", ETX DL = " << it.second.second[3].first
+               << " (" << it.second.second[3].second << ")" << endl;
         }
     }
     EV << "virtualRouter::printTable(): ***** End Print Table *****" << endl;
@@ -333,14 +353,16 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
            }
            case ETX:
            {
-               w = jt.second.second[2].first;                  // weighting by ETX
+               wU = jt.second.second[2].first;                  // weighting by ETX UL
+               wD = jt.second.second[3].first;                  // weighting by ETX DL
                w_min = 1;
-               addEdgeSymmetric(adj,u,v,w);
+               addEdgeAsymmetric(adj,u,v,wU,wD);
                break;
            }
            case ETT:
            {
-               double etx = jt.second.second[1].first;
+               double etxUL = jt.second.second[2].first;
+               double etxDL = jt.second.second[3].first;
                Cqi cqi = jt.second.second[0].first;
                // number of antenna layers.
                unsigned int layers = 1;                        // @TODO: support MIMO?
@@ -353,8 +375,8 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
                double transmissionRateDL = mac_->getAmc()->readTbsVect(cqi,layers,DL)[numRbDl];
                // ETT of each channel = ETX * packet size / transmission rate
                // Packet size is omitted because it's unnecessary for comparison
-               wU = etx/transmissionRateUL;
-               wD = etx/transmissionRateDL;
+               wU = etxUL/transmissionRateUL;
+               wD = etxDL/transmissionRateDL;
                // ETT is relatively small so a small number should be sufficient as min weight
                w_min = 0.00001;
                addEdgeAsymmetric(adj,u,v,wU,wD);
