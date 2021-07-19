@@ -518,17 +518,23 @@ enum virtualRouterState
 {
     DOWN, INIT, TWO_WAY, EXSTART, EXCHANGE, LOADING, FULL
 };
-//@TODO: I wish I knew about std::tupple before implementing these horrible types... Also considering using struct for readability
-// vUE ID, CQI
-typedef std::map<MacNodeId,Cqi> ueCqi;
-// vUE ID, ETX
-typedef std::pair<MacNodeId,double> ueEtx;
-// vUE ID, Owner E2NB ID, Cost/Timestamp [CQI UL - CQI DL - ETX UL - ETX DL]
-typedef std::map<MacNodeId,std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,4>>> ueEnbCost; //@TODO
-// Master E2NB ID, vUE ID, Owner E2NB ID, Cost
-typedef std::pair<MacNodeId,ueEnbCost> virtualRoutingTableEntry;
-// Store network information of net info pairs
+
+typedef struct enbCost {
+    MacNodeId ownerID;
+    std::pair<Cqi,simtime_t> cqiUL;
+    std::pair<Cqi,simtime_t> cqiDL;
+    std::pair<double,simtime_t> etxUL;
+    std::pair<double,simtime_t> etxDL;
+//    std::pair<std::vector<Cqi>,simtime_t> bandCQI;
+} enbCost;
+
+typedef struct virtualRoutingTableEntry {
+    MacNodeId masterID;
+    std::map<MacNodeId,enbCost> ueEnbCost;
+} virtualRoutingTableEntry;
+
 typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
+
 // Get ownerId of vUE
 MacNodeId getOwnerId(MacNodeId nodeId);
 // check if this eNB is the owner of this vUE

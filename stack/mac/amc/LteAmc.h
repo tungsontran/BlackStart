@@ -60,7 +60,6 @@ class LteAmc
     int numAntennas_;
     RemoteSet remoteSet_;
     Cqi kCqi_;
-    ueCqi ueCqi_;
     ConnectedUesMap dlConnectedUe_;
     ConnectedUesMap ulConnectedUe_;
     ConnectedUesMap d2dConnectedUe_;

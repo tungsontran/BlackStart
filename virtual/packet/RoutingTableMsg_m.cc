@@ -148,6 +148,7 @@ void doParsimUnpacking(omnetpp::cCommBuffer *, T& t)
 
 }  // namespace omnetpp
 
+namespace inet {
 
 // forward
 template<typename T, typename A>
@@ -307,7 +308,7 @@ class RoutingTableMsgDescriptor : public omnetpp::cClassDescriptor
 
 Register_ClassDescriptor(RoutingTableMsgDescriptor)
 
-RoutingTableMsgDescriptor::RoutingTableMsgDescriptor() : omnetpp::cClassDescriptor("RoutingTableMsg", "omnetpp::cPacket")
+RoutingTableMsgDescriptor::RoutingTableMsgDescriptor() : omnetpp::cClassDescriptor("inet::RoutingTableMsg", "omnetpp::cPacket")
 {
     propertynames = nullptr;
 }
@@ -536,4 +537,5 @@ void *RoutingTableMsgDescriptor::getFieldStructValuePointer(void *object, int fi
     }
 }
 
+} // namespace inet
 

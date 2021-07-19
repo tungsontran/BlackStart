@@ -46,26 +46,25 @@ virtualRouter::~virtualRouter()
 //    delete lsaMsg_;
 }
 
-void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRoutingTableEntry entry)
+void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTableEntry entry)
 {
     if (table.empty())
     {
         EV << "Empty Table!" << endl;
         EV << "virtualRouter::addTableEntry - Added entry: " << endl;
-        EV << "Master_ID " << entry.first << endl;
-        ueEnbCost::iterator jt;
-        for (auto jt: entry.second)
+        EV << "Master_ID " << entry.masterID << endl;
+        for (auto jt: entry.ueEnbCost)
         {
-            EV << "Owner_ID " << jt.second.first
+            EV << "Owner_ID " << jt.second.ownerID
                << " - vUE_ID " << jt.first
-               << " - CQI UL " << jt.second.second[0].first
-               << " (" << jt.second.second[0].second << ")"
-               << " - CQI DL " << jt.second.second[1].first
-               << " (" << jt.second.second[1].second << ")"
-               << " - ETX UL " << jt.second.second[2].first
-               << " (" << jt.second.second[2].second << ")"
-               << " - ETX DL " << jt.second.second[3].first
-               << " (" << jt.second.second[3].second << ")" << endl;
+               << " - CQI UL " << jt.second.cqiUL.first
+               << " (" << jt.second.cqiUL.second << ")"
+               << " - CQI DL " << jt.second.cqiDL.first
+               << " (" << jt.second.cqiDL.second << ")"
+               << " - ETX UL " << jt.second.etxUL.first
+               << " (" << jt.second.etxUL.second << ")"
+               << " - ETX DL " << jt.second.etxDL.first
+               << " (" << jt.second.etxDL.second << ")" << endl;
         }
         table.push_back(entry);
         return;
@@ -75,76 +74,74 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
         for (auto table_entry = table.begin();table_entry != table.end(); ++table_entry)    // iterate through table
         {
             // update existing entry
-            if (table_entry->first == entry.first)                                          // match master ID of the 2 entries
+            if (table_entry->masterID == entry.masterID)                                    // match master ID of the 2 entries
             {
-                EV << "virtualRouter::addTableEntry - Found entry for Master_ID " << table_entry->first << endl;
+                EV << "*********************************************************************" << endl;
+                EV << "virtualRouter::addTableEntry - Found entry for Master_ID " << table_entry->masterID << endl;
                 // iterate through vUE list of this table entry
-                for (auto it = table_entry->second.begin(); it != table_entry->second.end(); ++it)
+                for (auto it = table_entry->ueEnbCost.begin(); it != table_entry->ueEnbCost.end(); ++it)
                 {
-                    EV << "Owner_ID " << it->second.first
+                    EV << "Owner_ID " << it->second.ownerID
                        << " - vUE_ID " << it->first
-                       << " - CQI UL " << it->second.second[0].first
-                       << " (" << it->second.second[0].second << ")"
-                       << " - CQI DL " << it->second.second[1].first
-                       << " (" << it->second.second[1].second << ")"
-                       << " - ETX UL " << it->second.second[2].first
-                       << " (" << it->second.second[2].second << ")"
-                       << " - ETX DL " << it->second.second[3].first
-                       << " (" << it->second.second[3].second << ")" << endl;
+                       << " - CQI UL " << it->second.cqiUL.first
+                       << " (" << it->second.cqiUL.second << ")"
+                       << " - CQI DL " << it->second.cqiDL.first
+                       << " (" << it->second.cqiDL.second << ")"
+                       << " - ETX UL " << it->second.etxUL.first
+                       << " (" << it->second.etxUL.second << ")"
+                       << " - ETX DL " << it->second.etxDL.first
+                       << " (" << it->second.etxDL.second << ")" << endl;
                     // iterate through vUE list of the adding entry
-                    for (auto jt = entry.second.begin(); jt != entry.second.end(); ++jt)
+                    for (auto jt = entry.ueEnbCost.begin(); jt != entry.ueEnbCost.end(); ++jt)
                     {
                         if (it->first == jt->first)    // match vUE ID of the 2 entries
                         {
-                            EV << "Found sub-entry for vUE " << it->first << endl;
+                            EV << "Found sub-entry for vUE " << jt->first << endl;
                             // if adding entry has newer UL CQI, update old CQI in the table
-                            if (it->second.second[0].second < jt->second.second[0].second)
+                            if (it->second.cqiUL.second < jt->second.cqiUL.second)
                             {
-                                it->second.second[0].first = jt->second.second[0].first;
-                                it->second.second[0].second = jt->second.second[0].second;
+                                it->second.cqiUL.first = jt->second.cqiUL.first;
+                                it->second.cqiUL.second = jt->second.cqiUL.second;
                             }
                             // if adding entry has newer DL CQI, update old CQI in the table
-                            if (it->second.second[1].second < jt->second.second[1].second)
+                            if (it->second.cqiDL.second < jt->second.cqiDL.second)
                             {
-                                it->second.second[1].first = jt->second.second[1].first;
-                                it->second.second[1].second = jt->second.second[1].second;
+                                it->second.cqiDL.first = jt->second.cqiDL.first;
+                                it->second.cqiDL.second = jt->second.cqiDL.second;
                             }
                             // if adding entry has newer UL ETX, update old ETX in the table
-                            if (it->second.second[2].second < jt->second.second[2].second)
+                            if (it->second.etxUL.second < jt->second.etxUL.second)
                             {
-                                it->second.second[2].first = jt->second.second[2].first;
-                                it->second.second[2].second = jt->second.second[2].second;
+                                it->second.etxUL.first = jt->second.etxUL.first;
+                                it->second.etxUL.second = jt->second.etxUL.second;
                             }
                             // if adding entry has newer DL ETX, update old ETX in the table
-                            if (it->second.second[3].second < jt->second.second[3].second)
+                            if (it->second.etxDL.second < jt->second.etxDL.second)
                             {
-                                it->second.second[3].first = jt->second.second[3].first;
-                                it->second.second[3].second = jt->second.second[3].second;
+                                it->second.etxDL.first = jt->second.etxDL.first;
+                                it->second.etxDL.second = jt->second.etxDL.second;
                             }
+//                            auto zt = entry.ueEnbCost.find(jt->first);
+                            entry.ueEnbCost.erase(jt);
                         }
-                        else if (std::next(it) == table_entry->second.end())
-                        {   // @TODO: extremely inelegant lol
-                            EV << "Sub-entry for vUE " << it->first << " not found, adding it to the table" << endl;
-                            std::pair<double,simtime_t> cqiUL_time = std::make_pair(jt->second.second[0].first,jt->second.second[0].second);
-                            std::pair<double,simtime_t> cqiDL_time = std::make_pair(jt->second.second[1].first,jt->second.second[1].second);
-                            std::pair<double,simtime_t> etxUL_time = std::make_pair(jt->second.second[2].first,jt->second.second[2].second);
-                            std::pair<double,simtime_t> etxDL_time = std::make_pair(jt->second.second[3].first,jt->second.second[3].second);
-                            std::array<std::pair<double,simtime_t>,4> costArray= {{cqiUL_time, cqiDL_time, etxUL_time, etxDL_time}};
-                            std::pair<MacNodeId,std::array<std::pair<double,simtime_t>,4>> ownerCost = std::make_pair(jt->second.first,costArray);
-                            table_entry->second.insert(std::make_pair(jt->first,ownerCost));
+                        else if (std::next(it) == table_entry->ueEnbCost.end())
+                        {
+                            EV << "Sub-entry for vUE " << jt->first << " not found, adding it to the table" << endl;
+                            table_entry->ueEnbCost.insert(std::make_pair(jt->first,jt->second));
                         }
                     }
-                    EV << "Updated entry for Master_ID " << table_entry->first << endl;
-                    EV << "Owner_ID " << it->second.first
+                    EV << "Updated entry for Master_ID " << table_entry->masterID << endl;
+                    EV << "Owner_ID " << it->second.ownerID
                        << " - vUE_ID " << it->first
-                       << " - CQI UL " << it->second.second[0].first
-                       << " (" << it->second.second[0].second << ")"
-                       << " - CQI DL " << it->second.second[1].first
-                       << " (" << it->second.second[1].second << ")"
-                       << " - ETX UL " << it->second.second[2].first
-                       << " (" << it->second.second[2].second << ")"
-                       << " - ETX DL " << it->second.second[3].first
-                       << " (" << it->second.second[3].second << ")" << endl;
+                       << " - CQI UL " << it->second.cqiUL.first
+                       << " (" << it->second.cqiUL.second << ")"
+                       << " - CQI DL " << it->second.cqiDL.first
+                       << " (" << it->second.cqiDL.second << ")"
+                       << " - ETX UL " << it->second.etxUL.first
+                       << " (" << it->second.etxUL.second << ")"
+                       << " - ETX DL " << it->second.etxDL.first
+                       << " (" << it->second.etxDL.second << ")" << endl;
+                    EV << "*********************************************************************" << endl;
                 }
                 return;
             }
@@ -152,19 +149,19 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
             else if(std::next(table_entry) == table.end())
             {
                 EV << "Added entry: " << endl;
-                EV << "Master_ID " << entry.first << endl;
-                for (auto jt: entry.second)
+                EV << "Master_ID " << entry.masterID << endl;
+                for (auto jt: entry.ueEnbCost)
                 {
-                    EV << "Owner_ID " << jt.second.first
+                    EV << "Owner_ID " << jt.second.ownerID
                        << " - vUE_ID " << jt.first
-                       << " - CQI UL " << jt.second.second[0].first
-                       << " (" << jt.second.second[0].second << ")"
-                       << " - CQI DL " << jt.second.second[1].first
-                       << " (" << jt.second.second[1].second << ")"
-                       << " - ETX UL " << jt.second.second[2].first
-                       << " (" << jt.second.second[2].second << ")"
-                       << " - ETX DL " << jt.second.second[3].first
-                       << " (" << jt.second.second[3].second << ")" << endl;
+                       << " - CQI UL " << jt.second.cqiUL.first
+                       << " (" << jt.second.cqiUL.second << ")"
+                       << " - CQI DL " << jt.second.cqiDL.first
+                       << " (" << jt.second.cqiDL.second << ")"
+                       << " - ETX UL " << jt.second.etxUL.first
+                       << " (" << jt.second.etxUL.second << ")"
+                       << " - ETX DL " << jt.second.etxDL.first
+                       << " (" << jt.second.etxDL.second << ")" << endl;
                 }
                 table.push_back(entry);
                 return;
@@ -175,23 +172,23 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, const virtualRouti
 
 void virtualRouter::setDirectNeighborsCQI(const MacNodeId vUEid, const Cqi CqiUL, const Cqi CqiDL)
 {
-    directNeighbors_.first = nodeId_;                                  // entry header (master ID)
+    directNeighbors_.masterID = nodeId_;                               // entry header (master ID)
 
-    directNeighbors_.second[vUEid].first = getOwnerId(vUEid);          // owner ID corresponding to vUE ID
-    directNeighbors_.second[vUEid].second[0].first = CqiUL;            // CQI UL
-    directNeighbors_.second[vUEid].second[0].second = NOW;             // CQI UL write time stamp
-    directNeighbors_.second[vUEid].second[1].first = CqiDL;            // CQI DL
-    directNeighbors_.second[vUEid].second[1].second = NOW;             // CQI DL write time stamp
+    directNeighbors_.ueEnbCost[vUEid].ownerID = getOwnerId(vUEid);     // owner ID corresponding to vUE ID
+    directNeighbors_.ueEnbCost[vUEid].cqiUL.first = CqiUL;             // CQI UL
+    directNeighbors_.ueEnbCost[vUEid].cqiUL.second = NOW;              // CQI UL write time stamp
+    directNeighbors_.ueEnbCost[vUEid].cqiDL.first = CqiDL;             // CQI DL
+    directNeighbors_.ueEnbCost[vUEid].cqiDL.second = NOW;              // CQI DL write time stamp
 
     addTableEntry(networkTopoTable_, directNeighbors_);
 }
 
 void virtualRouter::setDirectNeighborsETX(const MacNodeId vUEid, const double etxUL, const double etxDL)
 {
-    directNeighbors_.second[vUEid].second[2].first = etxUL;            // ETX UL
-    directNeighbors_.second[vUEid].second[2].second = NOW;             // ETX UL write time stamp
-    directNeighbors_.second[vUEid].second[3].first = etxDL;            // ETX DL
-    directNeighbors_.second[vUEid].second[3].second = NOW;             // ETX DL write time stamp
+    directNeighbors_.ueEnbCost[vUEid].etxUL.first = etxUL;            // ETX UL
+    directNeighbors_.ueEnbCost[vUEid].etxUL.second = NOW;             // ETX UL write time stamp
+    directNeighbors_.ueEnbCost[vUEid].etxDL.first = etxDL;            // ETX DL
+    directNeighbors_.ueEnbCost[vUEid].etxDL.second = NOW;             // ETX DL write time stamp
 
     addTableEntry(networkTopoTable_, directNeighbors_);
 }
@@ -206,44 +203,42 @@ virtualRoutingTable virtualRouter::getNetworkTopoTable()
     return networkTopoTable_;
 }
 
-void virtualRouter::printDirectNeighbors()
-{
-    EV << "virtualRouter::printDirectNeighbors(): This ENB " << directNeighbors_.first << " is connecting to the following vUEs:" << endl;
-    ueCqi::iterator it;
-    for (auto it: directNeighbors_.second)
-    {
-        EV << "virtualRouter::printDirectNeighbors(): vUE " << it.first
-                                         << ", Owner E2NB " << it.second.first
-                                         << ", CQI UL: " << it.second.second[0].first
-                                         << " (" << it.second.second[0].second << ")"
-                                         << ", CQI DL: " << it.second.second[1].first
-                                         << " (" << it.second.second[1].second << ")"
-                                         << ", ETX UL: " << it.second.second[2].first
-                                         << " (" << it.second.second[2].second << ")"
-                                         << ", ETX DL: " << it.second.second[3].first
-                                         << " (" << it.second.second[3].second << ")" << endl;
-    }
-}
+//void virtualRouter::printDirectNeighbors()
+//{
+//    EV << "virtualRouter::printDirectNeighbors(): This ENB " << directNeighbors_.first << " is connecting to the following vUEs:" << endl;
+//    for (auto it: directNeighbors_.second)
+//    {
+//        EV << "virtualRouter::printDirectNeighbors(): vUE " << it.first
+//                                         << ", Owner E2NB " << it.second.first
+//                                         << ", CQI UL: " << it.second.second[0].first
+//                                         << " (" << it.second.second[0].second << ")"
+//                                         << ", CQI DL: " << it.second.second[1].first
+//                                         << " (" << it.second.second[1].second << ")"
+//                                         << ", ETX UL: " << it.second.second[2].first
+//                                         << " (" << it.second.second[2].second << ")"
+//                                         << ", ETX DL: " << it.second.second[3].first
+//                                         << " (" << it.second.second[3].second << ")" << endl;
+//    }
+//}
 
 void virtualRouter::printTable(const virtualRoutingTable table, const char* name)
 {
     EV << "virtualRouter::printTable(): ***** "<< name <<" *****" << endl;
-    virtualRoutingTable::iterator tableEntry;
     for (auto tableEntry: table)
     {
-        EV << "Master ENB " << tableEntry.first << endl;
-        for (auto it: tableEntry.second)
+        EV << "Master ENB " << tableEntry.masterID << endl;
+        for (auto it: tableEntry.ueEnbCost)
         {
-            EV << "Owner ENB " << it.second.first
+            EV << "Owner ENB " << it.second.ownerID
                << ", vUE " << it.first
-               << ", CQI UL = " << it.second.second[0].first
-               << " (" << it.second.second[0].second << ")"
-               << ", CQI DL = " << it.second.second[1].first
-               << " (" << it.second.second[1].second << ")"
-               << ", ETX UL = " << it.second.second[2].first
-               << " (" << it.second.second[2].second << ")"
-               << ", ETX DL = " << it.second.second[3].first
-               << " (" << it.second.second[3].second << ")" << endl;
+               << ", CQI UL = " << it.second.cqiUL.first
+               << " (" << it.second.cqiUL.second << ")"
+               << ", CQI DL = " << it.second.cqiDL.first
+               << " (" << it.second.cqiDL.second << ")"
+               << ", ETX UL = " << it.second.etxUL.first
+               << " (" << it.second.etxUL.second << ")"
+               << ", ETX DL = " << it.second.etxDL.first
+               << " (" << it.second.etxDL.second << ")" << endl;
         }
     }
     EV << "virtualRouter::printTable(): ***** End Print Table *****" << endl;
@@ -278,8 +273,7 @@ void virtualRouter::sendLSA()
 {
     // LSA on DL
     Enter_Method("sendLSA");
-    ueEnbCost::iterator it;
-    for (auto it: directNeighbors_.second)
+    for (auto it: directNeighbors_.ueEnbCost)
     {
         RoutingTableMsg* lsaMsg_ = new RoutingTableMsg();
 
@@ -289,7 +283,7 @@ void virtualRouter::sendLSA()
         lsaMsg_->setSourceAddr(srcAddr.toIPv4());
 
         lsaMsg_->setTable(networkTopoTable_);
-        lsaMsg_->setName("LSA_HELLO");
+        lsaMsg_->setName("LSA_DL");
         lsaMsg_->setByteLength(40); //@TODO table size?
 
         MacNodeId dstId = it.first; // ID of peering vUE
@@ -301,7 +295,7 @@ void virtualRouter::sendLSA()
         datagram->setSourceAddress(srcAddr);
         datagram->setDestinationAddress(dstAddr);
         datagram->setTransportProtocol(IP_PROT_NONE);
-        datagram->setName("LSA_HELLO");
+        datagram->setName("LSA_DL");
         datagram->encapsulate(lsaMsg_);
 
         send(datagram,"ipOut");
@@ -327,52 +321,53 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
    // map value from network topo table (nodeID) to adjacency matrix (vertex ID)
    for (auto it: networkTopoTable_)
    {
-       MacNodeId u = getAdjIndex(adjmap, it.first);            // Master ID
-       for (auto jt: it.second)
+       MacNodeId u = getAdjIndex(adjmap, it.masterID);              // Master ID
+       for (auto jt: it.ueEnbCost)
        {
-           MacNodeId v = getAdjIndex(adjmap, jt.first);        // vUE ID
-           MacNodeId o = getAdjIndex(adjmap, jt.second.first); // Owner ID
-           double w;                                           // symmetric edge weight
-           double w_min;                                       // minimum possible edge weight
-           double wU,wD;                                       // asymmetric edge weight
+           MacNodeId v = getAdjIndex(adjmap, jt.first);             // vUE ID
+           MacNodeId o = getAdjIndex(adjmap, jt.second.ownerID);    // Owner ID
+           double w;                                                // symmetric edge weight
+           double w_min;                                            // minimum possible edge weight
+           double wU,wD;                                            // asymmetric edge weight
            switch (metric){
            case HOP:
            {
-               w = 1;                                          // weighting by hop count
+               w = 1;                                               // weighting by hop count
                w_min = 1;
                addEdgeSymmetric(adj,u,v,w);
                break;
            }
            case CQI:
            {
-               wU = 1/jt.second.second[0].first;               // weighting by CQI UL, inverse to minimize
-               wD = 1/jt.second.second[1].first;               // weighting by CQI DL
-               w_min = (double) 1/15;                          // max CQI is 15 so min weight is 1/15
+               wU = (double) 1/jt.second.cqiUL.first;               // weighting by CQI UL, inverse to minimize
+               wD = (double) 1/jt.second.cqiDL.first;               // weighting by CQI DL
+               w_min = (double) 1/15;                               // max CQI is 15 so min weight is 1/15
                addEdgeAsymmetric(adj,u,v,wU,wD);
                break;
            }
            case ETX:
            {
-               wU = jt.second.second[2].first;                  // weighting by ETX UL
-               wD = jt.second.second[3].first;                  // weighting by ETX DL
+               wU = jt.second.etxUL.first;                          // weighting by ETX UL
+               wD = jt.second.etxDL.first;                          // weighting by ETX DL
                w_min = 1;
                addEdgeAsymmetric(adj,u,v,wU,wD);
                break;
            }
            case ETT:
            {
-               double etxUL = jt.second.second[2].first;
-               double etxDL = jt.second.second[3].first;
-               Cqi cqi = jt.second.second[0].first;
+               double etxUL = jt.second.etxUL.first;
+               double etxDL = jt.second.etxDL.first;
+               Cqi cqiUL = jt.second.cqiUL.first;
+               Cqi cqiDL = jt.second.cqiDL.first;
                // number of antenna layers.
-               unsigned int layers = 1;                        // @TODO: support MIMO?
+               unsigned int layers = 1;                     // @TODO: support MIMO?
                // get number of resource blocks for each channel
                int numRbUl = cellInfo_->getNumRbUl();
                int numRbDl = cellInfo_->getNumRbDl();
                // this is only the transmission rate per 1 millisecond (1 TTI),
                // it should be x1000 but would be unnecessary for comparison
-               double transmissionRateUL = mac_->getAmc()->readTbsVect(cqi,layers,UL)[numRbUl];
-               double transmissionRateDL = mac_->getAmc()->readTbsVect(cqi,layers,DL)[numRbDl];
+               double transmissionRateUL = mac_->getAmc()->readTbsVect(cqiUL,layers,UL)[numRbUl];
+               double transmissionRateDL = mac_->getAmc()->readTbsVect(cqiDL,layers,DL)[numRbDl];
                // ETT of each channel = ETX * packet size / transmission rate
                // Packet size is omitted because it's unnecessary for comparison
                wU = etxUL/transmissionRateUL;
