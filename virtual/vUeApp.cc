@@ -50,7 +50,7 @@ void vUeApp::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         sendLSA();
-        EV << "E2NB " << nodeId_ << " is sending Network Topo Table" << endl;
+        EV << "vUE " << nodeId_ << " is sending Network Topo Table" << endl;
         scheduleAt(NOW + lsaTimer_, msg);
         return;
     }
@@ -88,7 +88,7 @@ void vUeApp::handleFromInternal(IPv4Datagram *pkt)
     // from stack of vUE
     if (ownerType_ == UE)
     {
-        if (!strcmp(pkt->getName(),"LSA_HELLO"))
+        if (!strcmp(pkt->getName(),"LSA_DL"))
         {
             msg = check_and_cast<RoutingTableMsg*>(pkt->decapsulate());
             delete(pkt);
@@ -118,10 +118,9 @@ void vUeApp::sendLSA()
     if (ownerType_ == UE)
     {
         Enter_Method("sendLSA");
-        ueEnbCost::iterator it;
         virtualRoutingTableEntry directNeighbors = vRouter_->getDirectNeighbors();
         virtualRoutingTable networkTopoTable = vRouter_->getNetworkTopoTable();
-        for (auto it: directNeighbors.second)
+        for (auto it: directNeighbors.ueEnbCost)
         {
             RoutingTableMsg* msg = new RoutingTableMsg();
 
@@ -131,10 +130,10 @@ void vUeApp::sendLSA()
             msg->setSourceAddr(srcAddr.toIPv4());
 
             msg->setTable(networkTopoTable);
-            msg->setName("LSA_HELLO");
+            msg->setName("LSA_UL");
             msg->setByteLength(40); //@TODO table size?
 
-            MacNodeId dstId = it.second.first; // ID of peering eNB
+            MacNodeId dstId = binder_->getNextHop(srcId); // ID of peering eNB
             msg->setDestId(dstId);
             L3Address dstAddr = binder_->getL3Address(dstId);
             msg->setDestAddr(dstAddr.toIPv4());
@@ -143,7 +142,7 @@ void vUeApp::sendLSA()
             datagram->setSourceAddress(srcAddr);
             datagram->setDestinationAddress(dstAddr);
             datagram->setTransportProtocol(IP_PROT_NONE);
-            datagram->setName("LSA_HELLO");
+            datagram->setName("LSA_UL");
             datagram->encapsulate(msg);
 
             send(datagram,"intIO$o");
