@@ -16,23 +16,6 @@ cplusplus {{
     #include "common/LteCommon.h"
     #include "inet/networklayer/contract/ipv4/IPv4Address.h"
     #include <vector>
-//    typedef unsigned short MacNodeId;
-    
-//    typedef struct enbCost {
-//        MacNodeId ownerID;
-//        std::pair<Cqi,simtime_t> cqiUL;
-//        std::pair<Cqi,simtime_t> cqiDL;
-//        std::pair<double,simtime_t> etxUL;
-//        std::pair<double,simtime_t> etxDL;
-//    //    std::pair<std::vector<Cqi>,simtime_t> bandCQI;
-//    } enbCost;
-//    
-//    typedef struct virtualRoutingTableEntry {
-//        MacNodeId masterID;
-//        std::map<MacNodeId,enbCost> ueEnbCost;
-//    } virtualRoutingTableEntry;
-    
-//    typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
 }}
 
 class noncobject virtualRoutingTable;

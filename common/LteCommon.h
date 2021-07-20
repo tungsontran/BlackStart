@@ -519,22 +519,6 @@ enum virtualRouterState
     DOWN, INIT, TWO_WAY, EXSTART, EXCHANGE, LOADING, FULL
 };
 
-typedef struct enbCost {
-    MacNodeId ownerID;
-    std::pair<Cqi,simtime_t> cqiUL;
-    std::pair<Cqi,simtime_t> cqiDL;
-    std::pair<double,simtime_t> etxUL;
-    std::pair<double,simtime_t> etxDL;
-//    std::pair<std::vector<Cqi>,simtime_t> bandCQI;
-} enbCost;
-
-typedef struct virtualRoutingTableEntry {
-    MacNodeId masterID;
-    std::map<MacNodeId,enbCost> ueEnbCost;
-} virtualRoutingTableEntry;
-
-typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
-
 // Get ownerId of vUE
 MacNodeId getOwnerId(MacNodeId nodeId);
 // check if this eNB is the owner of this vUE
@@ -881,6 +865,27 @@ typedef std::set<MacCid> ActiveSet;
  * Parameters read from xml file are stored in this map.
  */
 typedef std::map<std::string, cMsgPar> ParameterMap;
+
+/*********************
+ * Data structures for routing table
+ *********************/
+
+typedef struct enbCost {
+    MacNodeId ownerID;
+    std::pair<Cqi,simtime_t> cqiUL;
+    std::pair<Cqi,simtime_t> cqiDL;
+    std::pair<double,simtime_t> etxUL;
+    std::pair<double,simtime_t> etxDL;
+    std::pair<CqiVector,simtime_t> bandCqiUL;
+    std::pair<CqiVector,simtime_t> bandCqiDL;
+} enbCost;
+
+typedef struct virtualRoutingTableEntry {
+    MacNodeId masterID;
+    std::map<MacNodeId,enbCost> ueEnbCost;
+} virtualRoutingTableEntry;
+
+typedef std::vector<virtualRoutingTableEntry> virtualRoutingTable;
 
 /*********************
  * Utility functions

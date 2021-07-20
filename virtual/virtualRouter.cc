@@ -65,6 +65,14 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                << " (" << jt.second.etxUL.second << ")"
                << " - ETX DL " << jt.second.etxDL.first
                << " (" << jt.second.etxDL.second << ")" << endl;
+            EV << "BandCQI UL {" << jt.second.bandCqiUL.first.at(0);
+            for (int i = 1; i < jt.second.bandCqiUL.first.size(); ++i)
+                EV << ", " << jt.second.bandCqiUL.first.at(i);
+            EV << "} (" << jt.second.bandCqiUL.second << ")" << endl;
+            EV << "BandCQI DL {" << jt.second.bandCqiDL.first.at(0);
+            for (int i = 1; i < jt.second.bandCqiDL.first.size(); ++i)
+                EV << ", " << jt.second.bandCqiDL.first.at(i);
+            EV << "} (" << jt.second.bandCqiDL.second << ")" << endl;
         }
         table.push_back(entry);
         return;
@@ -91,6 +99,14 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                        << " (" << it->second.etxUL.second << ")"
                        << " - ETX DL " << it->second.etxDL.first
                        << " (" << it->second.etxDL.second << ")" << endl;
+                    EV << "BandCQI UL {" << it->second.bandCqiUL.first.at(0);
+                    for (int i = 1; i < it->second.bandCqiUL.first.size(); ++i)
+                        EV << ", " << it->second.bandCqiUL.first.at(i);
+                    EV << "} (" << it->second.bandCqiUL.second << ")" << endl;
+                    EV << "BandCQI DL {" << it->second.bandCqiDL.first.at(0);
+                    for (int i = 1; i < it->second.bandCqiDL.first.size(); ++i)
+                        EV << ", " << it->second.bandCqiDL.first.at(i);
+                    EV << "} (" << it->second.bandCqiDL.second << ")" << endl;
                     // iterate through vUE list of the adding entry
                     for (auto jt = entry.ueEnbCost.begin(); jt != entry.ueEnbCost.end(); ++jt)
                     {
@@ -121,7 +137,18 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                                 it->second.etxDL.first = jt->second.etxDL.first;
                                 it->second.etxDL.second = jt->second.etxDL.second;
                             }
-//                            auto zt = entry.ueEnbCost.find(jt->first);
+                            // if adding entry has newer UL band CQI, update old band CQI in the table
+                            if (it->second.bandCqiUL.second < jt->second.bandCqiUL.second)
+                            {
+                                it->second.bandCqiUL.first = jt->second.bandCqiUL.first;
+                                it->second.bandCqiUL.second = jt->second.bandCqiUL.second;
+                            }
+                            // if adding entry has newer DL band CQI, update old band CQI in the table
+                            if (it->second.bandCqiDL.second < jt->second.bandCqiDL.second)
+                            {
+                                it->second.bandCqiDL.first = jt->second.bandCqiDL.first;
+                                it->second.bandCqiDL.second = jt->second.bandCqiDL.second;
+                            }
                             entry.ueEnbCost.erase(jt);
                         }
                         else if (std::next(it) == table_entry->ueEnbCost.end())
@@ -141,6 +168,14 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                        << " (" << it->second.etxUL.second << ")"
                        << " - ETX DL " << it->second.etxDL.first
                        << " (" << it->second.etxDL.second << ")" << endl;
+                    EV << "BandCQI UL {" << it->second.bandCqiUL.first.at(0);
+                    for (int i = 1; i < it->second.bandCqiUL.first.size(); ++i)
+                        EV << ", " << it->second.bandCqiUL.first.at(i);
+                    EV << "} (" << it->second.bandCqiUL.second << ")" << endl;
+                    EV << "BandCQI DL {" << it->second.bandCqiDL.first.at(0);
+                    for (int i = 1; i < it->second.bandCqiDL.first.size(); ++i)
+                        EV << ", " << it->second.bandCqiDL.first.at(i);
+                    EV << "} (" << it->second.bandCqiDL.second << ")" << endl;
                     EV << "*********************************************************************" << endl;
                 }
                 return;
@@ -162,6 +197,14 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                        << " (" << jt.second.etxUL.second << ")"
                        << " - ETX DL " << jt.second.etxDL.first
                        << " (" << jt.second.etxDL.second << ")" << endl;
+                    EV << "BandCQI UL {" << jt.second.bandCqiUL.first.at(0);
+                    for (int i = 1; i < jt.second.bandCqiUL.first.size(); ++i)
+                        EV << ", " << jt.second.bandCqiUL.first.at(i);
+                    EV << "} (" << jt.second.bandCqiUL.second << ")" << endl;
+                    EV << "BandCQI DL {" << jt.second.bandCqiDL.first.at(0);
+                    for (int i = 1; i < jt.second.bandCqiDL.first.size(); ++i)
+                        EV << ", " << jt.second.bandCqiDL.first.at(i);
+                    EV << "} (" << jt.second.bandCqiDL.second << ")" << endl;
                 }
                 table.push_back(entry);
                 return;
@@ -170,7 +213,7 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
     }
 }
 
-void virtualRouter::setDirectNeighborsCQI(const MacNodeId vUEid, const Cqi CqiUL, const Cqi CqiDL)
+void virtualRouter::setDirectNeighborsCQI(const MacNodeId vUEid, const Cqi CqiUL, const Cqi CqiDL, const CqiVector bandCqiUL, const CqiVector bandCqiDL)
 {
     directNeighbors_.masterID = nodeId_;                               // entry header (master ID)
 
@@ -179,7 +222,10 @@ void virtualRouter::setDirectNeighborsCQI(const MacNodeId vUEid, const Cqi CqiUL
     directNeighbors_.ueEnbCost[vUEid].cqiUL.second = NOW;              // CQI UL write time stamp
     directNeighbors_.ueEnbCost[vUEid].cqiDL.first = CqiDL;             // CQI DL
     directNeighbors_.ueEnbCost[vUEid].cqiDL.second = NOW;              // CQI DL write time stamp
-
+    directNeighbors_.ueEnbCost[vUEid].bandCqiUL.first = bandCqiUL;     // Band CQI UL
+    directNeighbors_.ueEnbCost[vUEid].bandCqiUL.second = NOW;          // Band CQI UL write time stamp
+    directNeighbors_.ueEnbCost[vUEid].bandCqiDL.first = bandCqiDL;     // Band CQI DL
+    directNeighbors_.ueEnbCost[vUEid].bandCqiDL.second = NOW;          // Band CQI DL write time stamp
     addTableEntry(networkTopoTable_, directNeighbors_);
 }
 
