@@ -395,7 +395,7 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
            {
                wU = jt.second.etxUL.first;                          // weighting by ETX UL
                wD = jt.second.etxDL.first;                          // weighting by ETX DL
-               w_min = 1;
+               w_min = 0;
                addEdgeAsymmetric(adj,u,v,wU,wD);
                break;
            }

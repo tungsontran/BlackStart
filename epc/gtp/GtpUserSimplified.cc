@@ -278,15 +278,21 @@ LteNodeSubType GtpUserSimplified::getDstNodeSubType(IPv4Datagram* datagram)
 
 void GtpUserSimplified::forward(IPv4Datagram* datagram)
 {
+    adjMap adjMap = vRouter_->createAdjMap();
+
     L3Address dstAddr_o = datagram->getDestinationAddress();                // true dest address (UE)
     MacNodeId dstID = binder_->getMacNodeId(dstAddr_o.toIPv4());            // true dest ID (UE)
     EV << "DestID of this datagram: " << dstID << endl;
+
     MacNodeId dstMasterID = binder_->getNextHop(dstID);                     // ID of the master ENB which the UE attaches to
-    EV << "MasterID of this datagram: " << dstMasterID << endl;
+    MacNodeId dstVertex = getAdjIndex(adjMap,dstMasterID);                  // vertex ID of the master ENB which the UE attaches to
+    EV << "MasterID of this datagram: " << dstVertex << "(" << dstMasterID << ")" << endl;
+
     MacNodeId nextHopID = vRouter_->computeRoute(dstMasterID);              // ID of the vUE
-    EV << "Forwarding this datagram to next hop: " << nextHopID;
+    MacNodeId nextVertex = getAdjIndex(adjMap,nextHopID);                   // vertex ID of the vUE
+    EV << "Forwarding this datagram to next hop: " << nextVertex;
     const char* nextHopName = binder_->getModuleNameByMacNodeId(nextHopID); // Module name of the vUE
-    EV << "(" << nextHopName << ")" << endl;
+    EV << "(" << nextHopID << " | " << nextHopName << ")" << endl;
     EV << "Next hop is " << nextHopName << " owned by "
     << binder_->getModuleNameByMacNodeId(getOwnerId(nextHopID)) << " that serves "
     << binder_->getModuleNameByMacNodeId(binder_->getNextHop(nextHopID));

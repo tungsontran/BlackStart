@@ -20,7 +20,8 @@ simple virtualRouter
     parameters:
         double lsaTimer;
         double lsaStart;
-        string metric = default("HOP");	// HOP, CQI, ETT
+        string metric = default("HOP");					// see routingMetric in common.h to know the options
+        
     gates:
         input ipIn @labels(RoutingTableMsg/up);
         output ipOut @labels(RoutingTableMsg/down);

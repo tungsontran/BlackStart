@@ -39,7 +39,8 @@ void printSolution(std::vector<double> dist, int V, std::vector<MacNodeId> paren
 MacNodeId getNextHop(std::vector<MacNodeId> parent, MacNodeId src, MacNodeId dst);
 
 enum routingMetric {
-    HOP, CQI, ETX, ETT
+    HOP, CQI, ETX, ETT,
+    ADD_HOP_ETX, ADD_HOP_ETT, ADD_ETX_HOP, ADD_ETT_HOP,
 };
 
 routingMetric getRoutingMetric (const char* weight);
