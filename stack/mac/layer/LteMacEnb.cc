@@ -937,10 +937,12 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
     }
     if (getNodeSubTypeById(id) == VUE)
     {
-        CqiVector bandCqiUL = amc_->getFeedback(id, MACRO, TRANSMIT_DIVERSITY, UL).getCqi(0);   // @TODO make txmode configurable
-        CqiVector bandCqiDL = amc_->getFeedback(id, MACRO, TRANSMIT_DIVERSITY, DL).getCqi(0);
-        Cqi CqiUL = *std::max_element(bandCqiUL.begin(),bandCqiUL.end());                       // @TODO max CQI setting, make this configurable too
-        Cqi CqiDL = *std::max_element(bandCqiDL.begin(),bandCqiDL.end());
+        const UserTxParams& txParamUL = amc_->getPilot()->computeTxParams(id, UL);
+        const UserTxParams& txParamDL = amc_->getPilot()->computeTxParams(id, DL);
+        CqiVector bandCqiUL = amc_->readMultiBandCqi(id, UL);
+        CqiVector bandCqiDL = amc_->readMultiBandCqi(id, DL);
+        Cqi CqiUL = txParamUL.readCqiVector().at(0);
+        Cqi CqiDL = txParamDL.readCqiVector().at(0);
         virtualRouter_->setDirectNeighborsCQI(id, CqiUL, CqiDL, bandCqiUL, bandCqiDL);
     }
     delete fb;
