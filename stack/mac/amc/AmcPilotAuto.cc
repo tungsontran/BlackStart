@@ -90,7 +90,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                     chosenCqi = s;
                 }
             }
-            EV << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user" << endl;
+            EV << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user (MAX CQI)" << endl;
         }
     }
     else if(mode_ == MIN_CQI)
@@ -112,7 +112,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                     chosenCqi = s;
                 }
             }
-            EV << NOW <<" AmcPilotAuto::computeTxParams - no UsableBand available for this user  (MIN CQI)." << endl;
+            EV << NOW <<" AmcPilotAuto::computeTxParams - no UsableBand available for this user (MIN CQI)." << endl;
         }
         else
         {
@@ -132,7 +132,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                 }
             }
 
-            EV << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user" << endl;
+            EV << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user (MIN CQI)." << endl;
         }
     }
 
