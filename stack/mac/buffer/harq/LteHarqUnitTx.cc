@@ -36,7 +36,8 @@ LteHarqUnitTx::LteHarqUnitTx(unsigned char acid, Codeword cw,
         harqErrorRate_3_ = dstMac_->registerSignal("harqErrorRate_3rd_Dl");
         harqErrorRate_4_ = dstMac_->registerSignal("harqErrorRate_4th_Dl");
         LteMacEnb* macEnb = check_and_cast<LteMacEnb*>(macOwner_);
-        virtualRouter_ = macEnb->getVirtualRouter();
+        if (getNodeSubType(macEnb->getAncestorPar("nodeSubType")) == E2NODEB)
+            virtualRouter_ = macEnb->getVirtualRouter();
     }
     else  // UE
     {

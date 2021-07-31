@@ -228,7 +228,8 @@ void LteMacEnb::initialize(int stage)
         cellId_ = nodeId_;
 
         /* get virtual Router*/
-        virtualRouter_ = getVirtualRouter();
+        if (getNodeSubType(getAncestorPar("nodeSubType")) == E2NODEB)
+            virtualRouter_ = getVirtualRouter();
 
         // TODO: read NED parameters, when will be present
         cellInfo_ = getCellInfo();
@@ -935,7 +936,7 @@ void LteMacEnb::macHandleFeedbackPkt(cPacket *pkt)
                 amc_->pushFeedback(id, UL, (*jt));
         }
     }
-    if (getNodeSubTypeById(id) == VUE)
+    if (getNodeSubType(getAncestorPar("nodeSubType")) == E2NODEB && getNodeSubTypeById(id) == VUE)
     {
         const UserTxParams& txParamUL = amc_->getPilot()->computeTxParams(id, UL);
         const UserTxParams& txParamDL = amc_->getPilot()->computeTxParams(id, DL);

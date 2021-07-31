@@ -39,7 +39,7 @@ class GtpUserSimplified : public cSimpleModule
     LteBinder* binder_;
 
     // reference to the virtual router
-    virtualRouter* vRouter_;
+    virtualRouter* vRouter_ = nullptr;
 
     /*
      * This table contains mapping between TrafficFlowTemplate (TFT) identifiers and the IP address

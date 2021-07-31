@@ -40,14 +40,14 @@ void GtpUserSimplified::initialize(int stage)
     {
         nodeId_ = getAncestorPar("macNodeId");
         subType_ = getNodeSubType(getAncestorPar("nodeSubType"));
-        // get reference to the virtual router
-        vRouter_ = check_and_cast<virtualRouter*>(getModuleByPath("^.virtualRouter"));
     }
 
     if (subType_ == E2NODEB)
     {
         // get mode
         mode_ = getE2NodeBMode(getParentModule()->par("mode").stringValue());
+        // get reference to the virtual router
+        vRouter_ = check_and_cast<virtualRouter*>(getModuleByPath("^.virtualRouter"));
     }
 }
 

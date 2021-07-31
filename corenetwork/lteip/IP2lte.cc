@@ -326,8 +326,10 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
 
     int headerSize = 0;
 
-    e2NodeBMode mode = getE2NodeBMode(getParentModule()->getParentModule()->par("mode"));
     LteNodeSubType subType = getNodeSubType(getParentModule()->getParentModule()->par("nodeSubType"));
+    e2NodeBMode mode = NORMAL;
+    if (subType == E2NODEB)
+        e2NodeBMode mode = getE2NodeBMode(getParentModule()->getParentModule()->par("mode"));
 //    const char* parentsName = getParentModule()->getParentModule()->getFullName();
 
     cPacket * transportPacket;

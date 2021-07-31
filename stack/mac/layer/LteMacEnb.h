@@ -38,7 +38,7 @@ class LteMacEnb : public LteMacBase
 
     int eNodeBCount;
 
-    virtualRouter* virtualRouter_;
+    virtualRouter* virtualRouter_ = nullptr;
     /**
      * Variable used for Downlink energy consumption computation
      */
