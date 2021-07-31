@@ -61,10 +61,10 @@ class ExtCell;
 #define ENB_MAX_ID 255
 #define RELAY_MIN_ID 257
 #define RELAY_MAX_ID 1023
-#define UE_MIN_ID 1025
-#define UE_MAX_ID 64003
-#define VUE_MIN_ID 64005
-#define VUE_MAX_ID 65535
+#define VUE_MIN_ID 1025
+#define VUE_MAX_ID 2555
+#define UE_MIN_ID 2557
+#define UE_MAX_ID 65535
 
 /// Max Number of Codewords
 #define MAX_CODEWORDS 2
