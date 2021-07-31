@@ -285,6 +285,15 @@ void virtualRouter::printTable(const virtualRoutingTable table, const char* name
                << " (" << it.second.etxUL.second << ")"
                << ", ETX DL = " << it.second.etxDL.first
                << " (" << it.second.etxDL.second << ")" << endl;
+            EV << "BandCQI UL {" << it.second.bandCqiUL.first.at(0);
+            for (int i = 1; i < it.second.bandCqiUL.first.size(); ++i)
+                EV << ", " << it.second.bandCqiUL.first.at(i);
+            EV << "} (" << it.second.bandCqiUL.second << ")" << endl;
+            EV << "BandCQI DL {" << it.second.bandCqiDL.first.at(0);
+            for (int i = 1; i < it.second.bandCqiDL.first.size(); ++i)
+                EV << ", " << it.second.bandCqiDL.first.at(i);
+            EV << "} (" << it.second.bandCqiDL.second << ")" << endl;
+            EV << "---------------------------------------------" << endl;
         }
     }
     EV << "virtualRouter::printTable(): ***** End Print Table *****" << endl;
