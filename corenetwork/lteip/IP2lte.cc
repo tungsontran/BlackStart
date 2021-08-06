@@ -329,14 +329,14 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
     LteNodeSubType subType = getNodeSubType(getParentModule()->getParentModule()->par("nodeSubType"));
     e2NodeBMode mode = NORMAL;
     if (subType == E2NODEB)
-        e2NodeBMode mode = getE2NodeBMode(getParentModule()->getParentModule()->par("mode"));
+        mode = getE2NodeBMode(getParentModule()->getParentModule()->par("mode"));
 //    const char* parentsName = getParentModule()->getParentModule()->getFullName();
 
     cPacket * transportPacket;
 
     // If the module is eNodeB or e2NodeB in normal scenario, process the datagram encapsulating a transport packet
-    if (subType == NONE ||
-        (subType == E2NODEB && mode == NORMAL))
+    if (subType == NONE || 
+	   (subType == E2NODEB && mode == NORMAL))
     {
         // obtain the encapsulated transport packet
         transportPacket = datagram->getEncapsulatedPacket();
