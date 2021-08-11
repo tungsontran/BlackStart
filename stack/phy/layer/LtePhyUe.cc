@@ -38,8 +38,8 @@ void LtePhyUe::initialize(int stage)
         enableHandover_ = par("enableHandover");
         handoverLatency_ = par("handoverLatency").doubleValue();
         dynamicCellAssociation_ = par("dynamicCellAssociation");
-        currentMasterRssi_ = 0;
-        candidateMasterRssi_ = 0;
+        currentMasterRssi_ = -INF;
+        candidateMasterRssi_ = -INF;
         hysteresisTh_ = 0;
         hysteresisFactor_ = 10;
         handoverDelta_ = 0.00001;
