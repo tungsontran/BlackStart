@@ -165,10 +165,18 @@ void LtePhyUe::dynamicCellAsociate()
 
         EV << "LtePhyUe::initialize - RSSI from eNodeB " << cellId << ": " << rssi << " dB (current candidate eNodeB " << candidateMasterId_ << ": " << candidateMasterRssi_ << " dB" << endl;
 
-        if (cellId == ownerId)
+        if (nodeSubType == VUE)
         {
-            EV << "This is an owner ENB. Will not attach to it." << endl;
-            continue;
+            if (cellId == ownerId)
+            {
+                EV << "This is an owner ENB. Will not attach to it." << endl;
+                continue;
+            }
+            if (checkPeer(ownerId,cellId))
+            {
+                EV << "Peer already connected. Finding another peer..." << endl;
+                continue;
+            }
         }
 
         if (rssi > candidateMasterRssi_)
@@ -185,6 +193,7 @@ void LtePhyUe::dynamicCellAsociate()
     getAncestorPar("masterId").setIntValue(masterId_);
     currentMasterRssi_ = candidateMasterRssi_;
     updateHysteresisTh(candidateMasterRssi_);
+    binder_->registerPeer(ownerId,masterId_);
 }
 
 void LtePhyUe::handleSelfMessage(cMessage *msg)

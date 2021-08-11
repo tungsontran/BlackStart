@@ -519,10 +519,12 @@ enum virtualRouterState
     DOWN, INIT, TWO_WAY, EXSTART, EXCHANGE, LOADING, FULL
 };
 
-// Get ownerId of vUE
+// given vUE ID, get owner eNB ID
 MacNodeId getOwnerId(MacNodeId nodeId);
 // check if this eNB is the owner of this vUE
 bool isOwner(MacNodeId vUE, MacNodeId eNB);
+// check if owner ENB already connects with master ENB
+bool checkPeer(MacNodeId ownerId, MacNodeId masterId);
 
 struct LteNodeTable
 {

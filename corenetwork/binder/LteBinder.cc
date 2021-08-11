@@ -26,6 +26,11 @@ void LteBinder::initialize(int stage)
     }
 }
 
+void LteBinder::registerPeer(MacNodeId ownerId, MacNodeId masterId)
+{
+    peerMap_[ownerId].push_back(masterId);
+}
+
 void LteBinder::unregisterNode(MacNodeId id)
 {
     EV << NOW << " LteBinder::unregisterNode - unregistering node " << id << endl;
@@ -150,6 +155,8 @@ void LteBinder::unregisterNextHop(MacNodeId masterId, MacNodeId slaveId)
         return;
     nextHop_[slaveId] = 0;
 }
+
+
 
 OmnetId LteBinder::getOmnetId(MacNodeId nodeId)
 {

@@ -59,6 +59,17 @@ bool isOwner(MacNodeId vUE, MacNodeId eNB)
         return false;
 }
 
+bool checkPeer(MacNodeId ownerId, MacNodeId masterId)
+{
+    LteBinder* binder = getBinder();
+    std::map<MacNodeId,std::vector<MacNodeId>>* peerMap = binder->getPeerMap();
+    std::vector<MacNodeId> peerList = (*peerMap)[ownerId];
+    if (std::find(peerList.begin(),peerList.end(),masterId) != peerList.end())
+        return true;
+    else
+        return false;
+}
+
 const std::string lteTrafficClassToA(LteTrafficClass type)
 {
     switch (type)

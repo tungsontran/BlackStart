@@ -50,6 +50,7 @@ class LteBinder : public cSimpleModule
     std::map<MacNodeId, LteMacBase*> macNodeIdToModule_;
     std::vector<MacNodeId> nextHop_; // MacNodeIdMaster --> MacNodeIdSlave
     std::map<int, OmnetId> nodeIds_;
+    std::map<MacNodeId,std::vector<MacNodeId>> peerMap_; // ownerId --> masterIds
 
     // list of static external cells. Used for intercell interference evaluation
     ExtCellList extCellList_;
@@ -189,15 +190,10 @@ class LteBinder : public cSimpleModule
     void unregisterNextHop(MacNodeId masterId, MacNodeId slaveId);
 
     /**
-     * registerOwner() is called at the initialization of vUE
-     *
-     * Maps vUE with the owner ENB
-     * Different with getOwnerId in LteCommon because the other is a
-     * direct getter method and can be used even before the register process
-     *
-     * The vUE will never change owner so no need for unregistering
+     * registerPeer() is called upon dynamic association of vUE
+     * Maps master ENB with the owner ENB
      */
-    void registerOwner(MacNodeId ownerId, MacNodeId vUEId);
+    void registerPeer(MacNodeId ownerId, MacNodeId masterId);
 
     /**
      * getOmnetId() returns the Omnet Id of the module
@@ -346,6 +342,11 @@ class LteBinder : public cSimpleModule
     std::vector<UeInfo*> * getUeList()
     {
         return &ueList_;
+    }
+
+    std::map<MacNodeId,std::vector<MacNodeId>> * getPeerMap()
+    {
+        return &peerMap_;
     }
 
     Cqi meanCqi(std::vector<Cqi> bandCqi,MacNodeId id,Direction dir);
