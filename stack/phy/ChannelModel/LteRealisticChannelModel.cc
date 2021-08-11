@@ -1686,8 +1686,7 @@ double LteRealisticChannelModel::computeUrbanMicro(double d, bool los)
    if (d < 10)
        d = 10;
 
-   double dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1)
-                       * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
+   double dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1) * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
    if (los)
    {
        // LOS situation
@@ -1720,8 +1719,7 @@ double LteRealisticChannelModel::computeUrbanMacro(double d, bool los)
    if (d < 10)
        d = 10;
 
-   double dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1)
-                       * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
+   double dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1) * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
    if (los)
    {
        if (d > 5000){
@@ -1759,8 +1757,7 @@ double LteRealisticChannelModel::computeSubUrbanMacro(double d, double& dbp, boo
    if (d < 10)
        d = 10;
 
-   dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1)
-                       * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
+   dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1) * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
    if (los)
    {
        if (d > 5000) {
@@ -1804,8 +1801,7 @@ double LteRealisticChannelModel::computeRuralMacro(double d, double& dbp, bool l
    if (d < 10)
        d = 10;
 
-   dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1)
-                       * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
+   dbp = 4 * (hNodeB_ - 1) * (hUe_ - 1) * ((carrierFrequency_ * 1000000000) / SPEED_OF_LIGHT);
    if (los)
    {
        // LOS situation
@@ -2179,6 +2175,13 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
                // no interference from UL/D2D connections of the same cell  (no D2D-UL reuse allowed)
                if (cellId == eNbId)
                    continue;
+
+               // no interference from vUE of the same owner
+               if (getNodeSubTypeById(ueId) == VUE && getNodeSubTypeById(senderId) == VUE)
+               {
+                   if (getOwnerId(ueId) == getOwnerId(senderId))
+                       continue;
+               }
 
                EV<<NOW<<" LteRealisticChannelModel::computeUplinkInterference - Interference from UE: "<< ueId << "(dir " << dirToA(dir) << ") on band[" << i << "]" << endl;
 
