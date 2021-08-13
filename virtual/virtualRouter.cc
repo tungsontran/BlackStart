@@ -151,7 +151,7 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                             }
                             entry.ueEnbCost.erase(jt);
                         }
-                        else if (std::next(it) == table_entry->ueEnbCost.end())
+                        if (std::next(it) == table_entry->ueEnbCost.end())
                         {
                             EV << "Sub-entry for vUE " << jt->first << " not found, adding it to the table" << endl;
                             table_entry->ueEnbCost.insert(std::make_pair(jt->first,jt->second));
@@ -181,7 +181,7 @@ void virtualRouter::addTableEntry(virtualRoutingTable& table, virtualRoutingTabl
                 return;
             }
             // if adding entry doesn't already exist in table entry, add it to the table
-            else if(std::next(table_entry) == table.end())
+            if(std::next(table_entry) == table.end())
             {
                 EV << "Added entry: " << endl;
                 EV << "Master_ID " << entry.masterID << endl;
