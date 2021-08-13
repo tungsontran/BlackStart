@@ -43,8 +43,8 @@ module vUe
         int macCellId = default(0); // TODO: this is not a real parameter
 
 		//# LSA
-		double lsaTimer;
-        double lsaStart;
+		double lsaTimer=default(0);
+        double lsaStart=default(0);
 
         //# D2D capability
         string nicType = default("LteNicUe");
