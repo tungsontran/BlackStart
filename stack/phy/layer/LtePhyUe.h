@@ -36,7 +36,7 @@ class LtePhyUe : public LtePhyBase
     double currentMasterRssi_;
 
     /** ID of not-master node from wich highest RSSI was received */
-    MacNodeId candidateMasterId_;
+    MacNodeId candidateMasterId_=1;
 
     /** Highest RSSI received from not-master node */
     double candidateMasterRssi_;
