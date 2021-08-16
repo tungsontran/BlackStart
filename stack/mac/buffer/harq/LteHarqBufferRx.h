@@ -51,6 +51,7 @@ class LteHarqBufferRx
     simsignal_t macDelay_;
     simsignal_t macCellThroughput_;
     simsignal_t macThroughput_;
+    simsignal_t macOwnerThroughput_;
 
     // reference to the eNB module
     cModule* nodeB_;
@@ -59,6 +60,7 @@ class LteHarqBufferRx
     // LteMacBase* for source with nodeId.
     // Only access via methods. This can be NULL if node is removed from simulation
     LteMacBase *macUe_;
+    LteMacBase *macOwnerEnb_ = nullptr;
 
   public:
     LteHarqBufferRx() {}
