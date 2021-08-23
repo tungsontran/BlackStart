@@ -21,11 +21,6 @@ LteHarqBufferRx::LteHarqBufferRx(unsigned int num, LteMacBase *owner,
 {
     macOwner_ = owner;
     nodeId_ = nodeId;
-    if (getNodeSubTypeById(nodeId_) == VUE)
-    {
-        MacNodeId ownerId = getOwnerId(nodeId_);
-        macOwnerEnb_ = check_and_cast<LteMacBase*>(getMacByMacNodeId(ownerId));
-    }
     macUe_ = check_and_cast<LteMacBase*>(getMacByMacNodeId(nodeId_));
     numHarqProcesses_ = num;
     processes_.resize(numHarqProcesses_);
@@ -42,19 +37,15 @@ LteHarqBufferRx::LteHarqBufferRx(unsigned int num, LteMacBase *owner,
     {
         nodeB_ = macOwner_;
         macDelay_ = macUe_->registerSignal("macDelayUl");
-        macThroughput_ = macUe_->registerSignal("macThroughputUl");
+        macThroughput_ = getMacByMacNodeId(nodeId_)->registerSignal("macThroughputUl");
         macCellThroughput_ = macOwner_->registerSignal("macCellThroughputUl");
-        if (getNodeSubTypeById(nodeId_) == VUE)
-            macOwnerThroughput_ = macOwnerEnb_->registerSignal("macCellThroughputUl");
     }
     else if (macOwner_->getNodeType() == UE)
     {
         nodeB_ = getMacByMacNodeId(macOwner_->getMacCellId());
-        macDelay_ = macOwner_->registerSignal("macDelayDl");
         macThroughput_ = macOwner_->registerSignal("macThroughputDl");
         macCellThroughput_ = nodeB_->registerSignal("macCellThroughputDl");
-        if (getNodeSubTypeById(nodeId_) == VUE)
-            macOwnerThroughput_ = macOwnerEnb_->registerSignal("macCellThroughputDl");
+        macDelay_ = macOwner_->registerSignal("macDelayDl");
     }
 }
 
@@ -151,14 +142,14 @@ std::list<LteMacPdu *> LteHarqBufferRx::extractCorrectPdus()
 
                 // emit throughput statistics
                 nodeB_->emit(macCellThroughput_, cellTputSample);
-
                 if (uInfo->getDirection() == DL)
+                {
                     macOwner_->emit(macThroughput_, tputSample);
+                }
                 else  // UL
+                {
                     macUe_->emit(macThroughput_, tputSample);
-
-                if (getNodeSubTypeById(nodeId_) == VUE)
-                    macOwnerEnb_->emit(macOwnerThroughput_, tputSample);
+                }
 
                 macOwner_->dropObj(temp);
                 ret.push_back(temp);
