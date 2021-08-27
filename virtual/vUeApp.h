@@ -27,6 +27,8 @@ class vUeApp : public cSimpleModule
     cMessage* lsa_;
     // Timer to send LSA again
     double lsaTimer_;
+    double lsaTimerWarmup_;
+    double warmUpPeriod_;
     // Timer to start sending LSA
     double lsaStart_;
 

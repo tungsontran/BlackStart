@@ -43,7 +43,9 @@ module vUe
         int macCellId = default(0); // TODO: this is not a real parameter
 
 		//# LSA
+		double warmUpPeriod;
 		double lsaTimer=default(0);
+		double lsaTimerWarmup=default(0);
         double lsaStart=default(0);
 
         //# D2D capability

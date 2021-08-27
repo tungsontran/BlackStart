@@ -18,6 +18,8 @@ package lte.virtual;
 simple virtualRouter
 {
     parameters:
+        double warmUpPeriod;
+        double lsaTimerWarmup;
         double lsaTimer;
         double lsaStart;
         string metric = default("HOP");					// see routingMetric in common.h to know the options

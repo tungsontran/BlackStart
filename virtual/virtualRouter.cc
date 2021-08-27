@@ -25,6 +25,8 @@ void virtualRouter::initialize(int stage)
     cellInfo_ = mac_->getCellInfo();
 
     lsa_ = nullptr;
+    warmUpPeriod_ = par("warmUpPeriod");
+    lsaTimerWarmup_ = par("lsaTimerWarmup");
     lsaTimer_ = par("lsaTimer");
     lsaStart_ = par("lsaStart");
     metric_ = getRoutingMetric(par("metric"));
@@ -305,7 +307,10 @@ void virtualRouter::handleMessage(cMessage *msg)
     {
         sendLSA();
         EV << "E2NB " << nodeId_ << " is sending Network Topo Table" << endl;
-        scheduleAt(NOW + lsaTimer_, msg);
+        if (NOW <= warmUpPeriod_)
+            scheduleAt(NOW + lsaTimerWarmup_, msg);
+        else
+            scheduleAt(NOW + lsaTimer_, msg);
         return;
     }
 

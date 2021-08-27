@@ -27,6 +27,8 @@ void vUeApp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL && ownerType_ == UE && enableLSA_ == true)
     {
         lsa_ = nullptr;
+        warmUpPeriod_ = getAncestorPar("warmUpPeriod");
+        lsaTimerWarmup_ = getAncestorPar("lsaTimerWarmup");
         lsaTimer_ = getAncestorPar("lsaTimer");
         lsaStart_ = getAncestorPar("lsaStart");
         lsa_ = new cMessage("linkStateAdvertisement");
@@ -51,7 +53,10 @@ void vUeApp::handleMessage(cMessage *msg)
     {
         sendLSA();
         EV << "vUE " << nodeId_ << " is sending Network Topo Table" << endl;
-        scheduleAt(NOW + lsaTimer_, msg);
+        if (NOW <= warmUpPeriod_)
+            scheduleAt(NOW + lsaTimerWarmup_, msg);
+        else
+            scheduleAt(NOW + lsaTimer_, msg);
         return;
     }
 
