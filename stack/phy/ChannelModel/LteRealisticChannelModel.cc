@@ -2227,6 +2227,13 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
                if (cellId == eNbId)
                    continue;
 
+               // no interference from vUE of the same owner
+               if (getNodeSubTypeById(ueId) == VUE && getNodeSubTypeById(senderId) == VUE)
+               {
+                   if (getOwnerId(ueId) == getOwnerId(senderId))
+                       continue;
+               }
+
                EV<<NOW<<" LteRealisticChannelModel::computeUplinkInterference - Interference from UE: "<< ueId << "(dir " << dirToA(dir) << ") on band[" << i << "]" << endl;
 
                // get tx power and attenuation from this UE
