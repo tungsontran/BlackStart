@@ -2160,6 +2160,8 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
            if (allocatedUes->empty()) // no UEs allocated on this band
                continue;
 
+           std::vector<bool> vUeClusterList(binder_->getEnbList()->size(),false);
+
            ue_it = allocatedUes->begin(), ue_et = allocatedUes->end();
            for (; ue_it != ue_et; ++ue_it)
            {
@@ -2181,6 +2183,17 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
                {
                    if (getOwnerId(ueId) == getOwnerId(senderId))
                        continue;
+               }
+
+               // vUEs of the same e2NB should not occupy the same band if proper intercell coordination is
+               // implemented, since we dont have that yet we assume that if overlapping happens, consider
+               // only the interference from 1 vUE instead of all of them
+               if (getNodeSubTypeById(ueId) == VUE)
+               {
+                   if (vUeClusterList[getOwnerId(ueId)-1])
+                      continue;
+                   else
+                      vUeClusterList[getOwnerId(ueId)-1] = true;
                }
 
                EV<<NOW<<" LteRealisticChannelModel::computeUplinkInterference - Interference from UE: "<< ueId << "(dir " << dirToA(dir) << ") on band[" << i << "]" << endl;
@@ -2211,6 +2224,8 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
            if (allocatedUes->empty()) // no UEs allocated on this band
                continue;
 
+           std::vector<bool> vUeClusterList(binder_->getEnbList()->size(),false);
+
            ue_it = allocatedUes->begin(), ue_et = allocatedUes->end();
            for (; ue_it != ue_et; ++ue_it)
            {
@@ -2232,6 +2247,17 @@ bool LteRealisticChannelModel::computeUplinkInterference(MacNodeId eNbId, MacNod
                {
                    if (getOwnerId(ueId) == getOwnerId(senderId))
                        continue;
+               }
+
+               // vUEs of the same e2NB should not occupy the same band if proper intercell coordination is
+               // implemented, since we dont have that yet we assume that if overlapping happens, consider
+               // only the interference from 1 vUE instead of all of them
+               if (getNodeSubTypeById(ueId) == VUE)
+               {
+                   if (vUeClusterList[getOwnerId(ueId)-1])
+                       continue;
+                   else
+                       vUeClusterList[getOwnerId(ueId)-1] = true;
                }
 
                EV<<NOW<<" LteRealisticChannelModel::computeUplinkInterference - Interference from UE: "<< ueId << "(dir " << dirToA(dir) << ") on band[" << i << "]" << endl;
