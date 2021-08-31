@@ -38,6 +38,7 @@ void BurstSender::initialize(int stage)
         burstSize_ = par("burstSize");
         interBurstTime_ = par("interBurstTime");
         intraBurstTime_ = par("intraBurstTime");
+        stopTime_ = par("stopTime");
         localPort_ = par("localPort");
         destPort_ = par("destPort");
 
@@ -52,7 +53,7 @@ void BurstSender::initialize(int stage)
 
 void BurstSender::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
+    if (msg->isSelfMessage() && simTime() <= stopTime_)
     {
         if (!strcmp(msg->getName(), "selfBurst"))
             sendBurst();

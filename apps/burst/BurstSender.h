@@ -32,6 +32,7 @@ class BurstSender : public cSimpleModule
     int burstSize_;
     int size_;
     simtime_t startTime_;
+    simtime_t stopTime_;
     simtime_t interBurstTime_;
     simtime_t intraBurstTime_;
 
