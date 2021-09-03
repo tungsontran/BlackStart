@@ -58,9 +58,9 @@ class GtpUserSimplified : public cSimpleModule
 
     EpcNodeType selectOwnerType(const char * type);
 
-    e2NodeBMode mode_;
+    e2NodeBMode mode_ = NORMAL;
 
-    LteNodeSubType subType_;
+    LteNodeSubType subType_ = NONE;
 
   protected:
 
