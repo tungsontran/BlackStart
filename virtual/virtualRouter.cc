@@ -322,7 +322,7 @@ void virtualRouter::handleMessage(cMessage *msg)
     {
         addTableEntry(networkTopoTable_,*it);
     }
-    printTable(networkTopoTable_,"Network Topo Table");
+//    printTable(networkTopoTable_,"Network Topo Table");
     // create graph for routing, map all existing nodes to vertices
     adjmap_ = createAdjMap();
     adj_ = createAdjMatrix(adjmap_, metric_);

@@ -483,11 +483,19 @@ void LtePhyUe::handleAirFrame(cMessage* msg)
         result = channelModel_->isCorrupted(frame,lteInfo);
     }
 
-            // update statistics
+    // update statistics
+    double sample;
     if (result)
+    {
         numAirFrameReceived_++;
+        sample = 0;
+    }
     else
+    {
         numAirFrameNotReceived_++;
+        sample = 1;
+    }
+    emit(numAirFrameCorrupted_,sample);
 
     EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << ( result ? "RECEIVED" : "NOT RECEIVED" ) << endl;

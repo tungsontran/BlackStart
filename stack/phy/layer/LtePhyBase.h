@@ -80,6 +80,7 @@ class LtePhyBase : public ChannelAccess
     /** Statistics */
     unsigned int numAirFrameReceived_;    /// number of LteAirFrame correctly received
     unsigned int numAirFrameNotReceived_; /// number of LteAirFrame not received
+    simsignal_t numAirFrameCorrupted_;
 
     /** Local device MacNodeId */
     MacNodeId nodeId_;

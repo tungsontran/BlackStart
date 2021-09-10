@@ -44,6 +44,7 @@ void LtePhyBase::initialize(int stage)
         carrierFrequency_ = 2.1e+9;
         WATCH(numAirFrameReceived_);
         WATCH(numAirFrameNotReceived_);
+        numAirFrameCorrupted_ = registerSignal("numAirFrameCorrupted");
 
         multicastD2DRange_ = par("multicastD2DRange");
         enableMulticastD2DRangeCheck_ = par("enableMulticastD2DRangeCheck");

@@ -45,6 +45,9 @@ simple LtePhyBase like LtePhy {
         // TODO move to LtePhyUeD2D module
         bool enableMulticastD2DRangeCheck = default(false);
         double multicastD2DRange @unit(m) = default(1000m);
+        
+        @signal[numAirFrameCorrupted];
+        @statistic[numAirFrameCorrupted](title="Number of corrupted frame"; unit = ""; source="numAirFrameCorrupted"; record=count,mean);
                
     gates:
         input upperGateIn;       // from upper layer

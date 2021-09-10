@@ -84,7 +84,7 @@ simple LteRealisticChannelModel like LteChannelModelInterface
     bool fixed_los = default(false);
     // Enable/disable fading -->  
     bool fading = default(true);
-    // Fading type (JAKES or RAYGHLEY) -->  
+    // Fading type (JAKES or RAYLEIGH) -->  
     string fading_type = default("JAKES");
     // If jakes fading this parameter specify the number of path (tap channel) -->  
     int fading_paths = default(6);
