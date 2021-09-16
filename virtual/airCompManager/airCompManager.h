@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
-
+/* 
 #ifndef __LTE_AIRCOMPMANAGER_H_
 #define __LTE_AIRCOMPMANAGER_H_
 
@@ -28,9 +28,6 @@ typedef enum {
 
 using namespace omnetpp;
 
-/**
- * TODO - Generated class
- */
 class airCompManager : public cSimpleModule
 {
   protected:
@@ -72,6 +69,6 @@ class airCompManager : public cSimpleModule
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-};
+}; 
 
-#endif
+#endif */

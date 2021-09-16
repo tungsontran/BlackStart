@@ -75,7 +75,10 @@ class LteMacEnb : public LteMacBase
     /// Number of RB Ul
     int numRbUl_;
 
-    /// airComp buffer
+    /// airComp buffer from compManager
+
+    /// airComp buffer to compManager
+
     /**
      * Reads MAC parameters for eNb and performs initialization.
      */

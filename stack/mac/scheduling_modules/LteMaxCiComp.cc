@@ -164,7 +164,7 @@ void LteMaxCiComp::prepareSchedule()
         if ( ! active || ! eligible )
         {
             score.pop ();
-            EV << NOW << "LteMaxCiComp::schedule  connection " << current.x_ << " was found ineligible" << endl;
+            EV << NOW << "LteMaxCiComp::schedule connection " << current.x_ << " was found ineligible" << endl;
         }
 
         // Set the connection as inactive if indicated by the grant ().

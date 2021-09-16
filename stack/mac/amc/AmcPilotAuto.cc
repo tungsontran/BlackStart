@@ -185,7 +185,7 @@ void AmcPilotAuto::setUsableBands(MacNodeId id , UsableBands usableBands)
     EV << "]"<<endl;
     UsableBandsList::iterator it = usableBandsList_.find(id);
 
-    // if usable bands for this node are already setm delete it (probably unnecessary)
+    // if usable bands for this node are already set delete it (probably unnecessary)
     if(it!=usableBandsList_.end())
         usableBandsList_.erase(id);
     usableBandsList_.insert(std::pair<MacNodeId,UsableBands>(id,usableBands));
@@ -227,7 +227,7 @@ bool AmcPilotAuto::getUsableBands(MacNodeId id, UsableBands*& uBands)
         return true;
     }
 
-    EV << " [All bands are usable]" << endl ;
+    EV << " [All bands are used]" << endl ;
     uBands = nullptr;
     return false;
 }

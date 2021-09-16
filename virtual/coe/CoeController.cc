@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "coe/CoeController.h"
+#include "CoeController.h"
 
 Define_Module(CoeController);
 

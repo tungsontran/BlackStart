@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "coe/CoeAgent.h"
+#include "CoeAgent.h"
 
 Define_Module(CoeAgent);
 

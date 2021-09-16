@@ -13,11 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package lte.virtual.airCompManager;
+//package lte.virtual.airCompManager;
 
 //
 // TODO auto-generated module
 //
-simple AirCompManager
-{
-}
+//simple AirCompManager
+//{
+//}
