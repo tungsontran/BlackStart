@@ -13,16 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "virtual/CoeAgent.h"
+package lte.virtual.coe;
 
-Define_Module(CoeAgent);
-
-void CoeAgent::initialize()
+//
+// TODO auto-generated module
+//
+simple CoeAgent
 {
-    // TODO - Generated method body
-}
-
-void CoeAgent::handleMessage(cMessage *msg)
-{
-    // TODO - Generated method body
+    parameters:
 }

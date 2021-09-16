@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package lte.virtual;
+package lte.virtual.coe;
 
 //
 // TODO auto-generated module
