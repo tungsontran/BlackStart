@@ -39,7 +39,7 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
     parent[src] = -1;
 
     // Insert source itself in priority queue and initialize its distance as 0.
-    pq.push(std::make_pair(0, src));
+    pq.push(weight(0, src));
 
     // Looping till priority queue becomes empty (or all distances are not finalized)
     while (!pq.empty())
@@ -47,22 +47,22 @@ std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjm
         // The first vertex in pair is the minimum distance vertex, extract it from priority queue.
         // vertex label is stored in second of pair (it has to be done this way to keep the vertices
         // sorted distance (distance must be first item in pair)
-        int u = pq.top().second;
+        int u = pq.top().dest_;
 
         pq.pop();
 
-        // Get all adjacent of u.
+        // Loop through all adjacent of u.
         for (auto x : adj[u])
         {
-            // Get vertex label and weight of current adjacent of u.
-            MacNodeId v = x.first;
-            double weight = x.second;
+            // Get vertex label and weight of the current adjacent of u.
+            MacNodeId v = x.dest_;
+            double wt = x.weight_;
             // If there is shorter path to v through u.
-            if (dist[v] > dist[u] + weight)
+            if (dist[v] > dist[u] + wt)
             {
                 // Updating distance of v
-                dist[v] = dist[u] + weight;
-                pq.push(std::make_pair(dist[v], v));
+                dist[v] = dist[u] + wt;
+                pq.push(weight(dist[v], v));
                 parent[v] = u;
             }
         }

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <algorithm>
 #include "common/LteCommon.h"
+#include <omnetpp/cenvir.h>
 
 #define INF 0x3f3f3f3f
 
@@ -19,7 +20,45 @@ using namespace omnetpp;
 
 class virtualRouter;
 
-typedef std::pair<MacNodeId,double> weight;
+template<typename T, typename S>
+struct Weight
+{
+    /// Dest node identifier.
+    T weight_;
+    /// weight value.
+    S dest_;
+
+    /// Comparison operator to enable sorting.
+    bool operator<(const Weight& y) const
+    {
+        if (weight_ < y.weight_)
+            return true;
+        if (weight_ == y.weight_)
+            return uniform(getEnvir()->getRNG(4),0,1) < 0.5;
+        return false;
+    }
+
+    bool operator>(const Weight& y) const
+    {
+        if (weight_ > y.weight_)
+            return true;
+        if (weight_ == y.weight_)
+            return uniform(getEnvir()->getRNG(4),0,1) < 0.5;
+        return false;
+    }
+
+  public:
+    Weight()
+    {
+
+    }
+    Weight(const T w, const S d)
+    {
+        weight_ = w;
+        dest_ = d;
+    }
+};
+typedef Weight<double,MacNodeId> weight;
 typedef std::vector<MacNodeId> adjMap;
 typedef std::vector<std::vector<weight>> adjMatrix;
 

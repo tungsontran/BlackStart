@@ -449,7 +449,7 @@ adjMatrix virtualRouter::createAdjMatrix(const adjMap& adjmap, routingMetric met
        EV << "u: " << i << endl;
        for (auto j: adj[i])
        {
-           EV << "  v: " << j.first << ", w: " << j.second << endl;
+           EV << "  v: " << j.dest_ << ", w: " << j.weight_ << endl;
        }
    }
    EV << "****************************" << endl;

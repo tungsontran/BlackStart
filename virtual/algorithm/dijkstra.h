@@ -17,14 +17,5 @@
 #ifndef VIRTUAL_ALGORITHM_DIJKSTRA_H_
 #define VIRTUAL_ALGORITHM_DIJKSTRA_H_
 
-//class dijkstra {
-//public:
-//    dijkstra();
-//    virtual ~dijkstra();
-//    dijkstra(const dijkstra &other);
-//
-//    void shortestPath(vector<cqiWeight> adj[], int V, int src);
-//};
-
 std::vector<MacNodeId> dijkstra(adjMatrix adj, int V, MacNodeId src, adjMap adjmap);
 #endif /* VIRTUAL_ALGORITHM_DIJKSTRA_H_ */
