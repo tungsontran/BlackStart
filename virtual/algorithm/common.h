@@ -34,7 +34,7 @@ struct Weight
         if (weight_ < y.weight_)
             return true;
         if (weight_ == y.weight_)
-            return uniform(getEnvir()->getRNG(4),0,1) < 0.5;
+            return uniform(getEnvir()->getRNG(0),0,1) < 0.5;
         return false;
     }
 
@@ -43,7 +43,7 @@ struct Weight
         if (weight_ > y.weight_)
             return true;
         if (weight_ == y.weight_)
-            return uniform(getEnvir()->getRNG(4),0,1) < 0.5;
+            return uniform(getEnvir()->getRNG(0),0,1) < 0.5;
         return false;
     }
 
